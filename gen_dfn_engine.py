@@ -10,18 +10,37 @@ import time
 from collections import defaultdict
 from typing import cast
 
+from tqdm import tqdm
 import matplotlib.pyplot as plt  # type: ignore
 import matplotlib.collections as mcoll  # type: ignore
+from matplotlib.patches import Circle  # type: ignore
+from matplotlib.collections import PatchCollection  # type: ignore
 
 # ==========================================
 # 模块 1：全局控制开关与宏观参数配置区
 # ==========================================
-INPUT_FILE = "E:/0.Information/4.Temp/StructLab/岩石力学/DFN/0.GEN/ini_xyr.dat"           
-OUTPUT_FILE = "E:/0.Information/4.Temp/StructLab/岩石力学/DFN/0.GEN/dfn_ini_xyr.dat"
+
+# 核心安全区强制裁剪
+CROP_MIN_X = 2000.0
+CROP_MAX_X = 6000.0
+CROP_MIN_Y = 3000.0
+CROP_MAX_Y = 11000.0
 
 # 机制总控开关
 ENABLE_HETEROGENEOUS = False          
-ENABLE_NODE_PENALTY = True           
+ENABLE_NODE_PENALTY = False           
+
+SOURCE_FILENAME = "ini_xyr.dat"
+TARGET_FILENAME = "ini_xyr.dat"
+
+TARGET_DIRECTORIES = [
+    r"E:\0.Information\4.Temp\StructLab\岩石力学部分\DFN\0.N1j纯泥岩\1.DFN\1.5MPa",
+    r"E:\0.Information\4.Temp\StructLab\岩石力学部分\DFN\0.N1j纯泥岩\1.DFN\2.10MPa",
+    r"E:\0.Information\4.Temp\StructLab\岩石力学部分\DFN\0.N1j纯泥岩\1.DFN\3.20MPa",
+    r"E:\0.Information\4.Temp\StructLab\岩石力学部分\DFN\0.N1j纯泥岩\1.DFN\4.40MPa",
+    r"E:\0.Information\4.Temp\StructLab\岩石力学部分\DFN\0.N1j纯泥岩\1.DFN\5.60MPa",
+    r"E:\0.Information\4.Temp\StructLab\岩石力学部分\DFN\0.N1j纯泥岩\1.DFN\6.80MPa",
+]
 
 # 强类型别名使用最新 Python 3.10+ 原生语法 |
 FractureValue = str | float
@@ -32,22 +51,22 @@ ParticleValue = str | float | int | None
 # -------------------------------------------------------------------
 FRACTURE_SETS: list[dict[str, FractureValue]] = [
     {
-        "set_name": "Primary_Fault",
-        "p21": 0.06,                 
-        "length_mult": 12.0,         
-        "length_std_ratio": 0.2,     
+        "set_name": "Primary_Fault", # 区域性主干断裂 (长且稀疏)
+        "p21": 0.002,                
+        "length_mult": 15.0,         
+        "length_std_ratio": 0.1,     
         "dip_mean": 45.0,            
-        "dip_std": 2.0,              
+        "dip_std": 1.0,              
         "truncation_prob": 0.0       
     },
     {
-        "set_name": "Secondary_Joints",
-        "p21": 0.04,
-        "length_mult": 6.0,
-        "length_std_ratio": 0.2,
+        "set_name": "Secondary_Joints", # 次生微裂隙 (短且极度稀疏)
+        "p21": 0.001,                   
+        "length_mult": 3.0,             
+        "length_std_ratio": 0.3,
         "dip_mean": -45.0,
         "dip_std": 5.0,
-        "truncation_prob": 0.85      
+        "truncation_prob": 0.90      # 90% 的概率被主断层截断形成 T 型交接
     }
 ]
 
@@ -175,110 +194,105 @@ def generate_dfn_network(area: float, min_x: float, max_x: float, min_y: float, 
         
         current_total_length: float = 0.0
         
-        while current_total_length < target_total_length:
-            L: float = random.lognormvariate(mu, sigma)
-            angle_deg: float = random.gauss(dip_mean, dip_std)
-            angle_rad: float = math.radians(angle_deg)
-            
-            r_rand: float = circumcircle_radius * math.sqrt(random.uniform(0.0, 1.0))
-            theta_rand: float = random.uniform(0.0, 2.0 * math.pi)
-            cx: float = center_x + r_rand * math.cos(theta_rand)
-            cy: float = center_y + r_rand * math.sin(theta_rand)
-            
-            dx: float = (L / 2.0) * math.cos(angle_rad)
-            dy: float = (L / 2.0) * math.sin(angle_rad)
-            curr_p1: tuple[float, float] = (cx - dx, cy - dy)
-            curr_p2: tuple[float, float] = (cx + dx, cy + dy)
-            
-            if trunc_prob > 0.0 and len(master_fractures) > 0:
-                for prev_f in master_fractures:
-                    intersect = get_segment_intersection(curr_p1, curr_p2, prev_f[0], prev_f[1])
-                    if intersect is not None:
-                        if random.random() < trunc_prob:
-                            d1: float = math.hypot(curr_p1[0] - intersect[0], curr_p1[1] - intersect[1])
-                            d2: float = math.hypot(curr_p2[0] - intersect[0], curr_p2[1] - intersect[1])
-                            if d1 > d2:
-                                curr_p2 = intersect
-                            else:
-                                curr_p1 = intersect
+        with tqdm(total=target_total_length, desc=f"生成组系 [{fset['set_name']}]", unit="m", leave=True) as pbar:
+            while current_total_length < target_total_length:
+                L: float = random.lognormvariate(mu, sigma)
+                angle_deg: float = random.gauss(dip_mean, dip_std)
+                angle_rad: float = math.radians(angle_deg)
+                
+                r_rand: float = circumcircle_radius * math.sqrt(random.uniform(0.0, 1.0))
+                theta_rand: float = random.uniform(0.0, 2.0 * math.pi)
+                cx: float = center_x + r_rand * math.cos(theta_rand)
+                cy: float = center_y + r_rand * math.sin(theta_rand)
+                
+                dx: float = (L / 2.0) * math.cos(angle_rad)
+                dy: float = (L / 2.0) * math.sin(angle_rad)
+                curr_p1: tuple[float, float] = (cx - dx, cy - dy)
+                curr_p2: tuple[float, float] = (cx + dx, cy + dy)
+                
+                if trunc_prob > 0.0 and len(master_fractures) > 0:
+                    for prev_f in master_fractures:
+                        intersect = get_segment_intersection(curr_p1, curr_p2, prev_f[0], prev_f[1])
+                        if intersect is not None:
+                            if random.random() < trunc_prob:
+                                d1: float = math.hypot(curr_p1[0] - intersect[0], curr_p1[1] - intersect[1])
+                                d2: float = math.hypot(curr_p2[0] - intersect[0], curr_p2[1] - intersect[1])
+                                if d1 > d2:
+                                    curr_p2 = intersect
+                                else:
+                                    curr_p1 = intersect
 
-            clip_result = clip_line_segment(curr_p1[0], curr_p1[1], curr_p2[0], curr_p2[1], min_x, max_x, min_y, max_y)
-            if clip_result is not None:
-                cx1, cy1, cx2, cy2 = clip_result
-                effective_length: float = math.hypot(cx2 - cx1, cy2 - cy1)
-                if effective_length > 0.0:
-                    master_fractures.append(((cx1, cy1), (cx2, cy2)))
-                    current_total_length += effective_length
+                clip_result = clip_line_segment(curr_p1[0], curr_p1[1], curr_p2[0], curr_p2[1], min_x, max_x, min_y, max_y)
+                if clip_result is not None:
+                    cx1, cy1, cx2, cy2 = clip_result
+                    effective_length: float = math.hypot(cx2 - cx1, cy2 - cy1)
+                    if effective_length > 0.0:
+                        master_fractures.append(((cx1, cy1), (cx2, cy2)))
+                        current_total_length += effective_length
+                        pbar.update(effective_length)
                     
     return master_fractures, len(master_fractures)
 
-def output_zdem_commands(output_path: str, tags_dict: dict[str, list[int]]):
-    print(f"[*] 正在极速组装 ZDEM 命令流导出序列 '{output_path}'...")
+def output_tagged_coordinates(output_path: str, lines_data: list[dict[str, ParticleValue]]):
+    print(f"[*] 正在追加信息并构建原生坐标输出文件 '{output_path}'...")
     with open(output_path, "w", encoding="utf-8") as f:
-        _ = f.write(";; ==========================================\n")
-        _ = f.write(";; ZDEM DFN GROUP ASSIGNMENT COMMAND STREAM\n")
-        _ = f.write(";; ==========================================\n\n")
-        
-        for tag_name, ids_list in tags_dict.items():
-            if not ids_list:
-                continue
-            
-            _ = f.write(f";; 正在分配物理群组 '{tag_name}' (合集颗粒数: {len(ids_list)})\n")
-            chunk_size = 100
-            for i in range(0, len(ids_list), chunk_size):
-                chunk = ids_list[i:i+chunk_size]
-                ids_str = " ".join(str(x) for x in chunk)
-                _ = f.write(f"group '{tag_name}' range id {ids_str}\n")
-            _ = f.write("\n")
-            
-        _ = f.write(";; ==========================================\n")
-        _ = f.write(";; MACROSCOPIC MICRO-PARAMETERS INJECTION\n")
-        _ = f.write(";; ==========================================\n")
-        _ = f.write("prop fric 2.5 ebmod 1.5e10 gbmod 1.5e10 tstrength 1.1e7 sstrength 2.4e7 range group ball_rand\n")
-        _ = f.write("prop fric 0.5 ebmod 1.5e9 gbmod 1.5e9 tstrength 1.0e5 sstrength 2.0e5 range group DFN_Gouge\n")
-        _ = f.write("prop fric 0.8 ebmod 2.5e9 gbmod 2.5e9 tstrength 3.0e5 sstrength 5.0e5 range group DFN_Matrix\n")
-        _ = f.write("prop fric 3.0 ebmod 2.0e10 gbmod 2.0e10 tstrength 1.5e7 sstrength 3.0e7 range group DFN_Asperity\n")
-        _ = f.write("prop fric 0.1 ebmod 5.0e8 gbmod 5.0e8 tstrength 1e4 sstrength 1e4 range group DFN_Node\n")
+        for item in lines_data:
+            if item.get("type") == "particle" and item.get("tag") is not None:
+                # 触发属性标记的情况，追加 Tab 分隔的后缀字符串
+                f.write(str(item["raw"]) + "\t" + str(item["tag"]) + "\n")
+            else:
+                # 包含不相关的 Header 以及未被切中的游离块情况，原样留存
+                f.write(str(item.get("raw", "")) + "\n")
 
 def generate_preview_plot(lines_data: list[dict[str, ParticleValue]], fractures: list[tuple[tuple[float, float], tuple[float, float]]], 
                           min_x: float, max_x: float, min_y: float, max_y: float):
     print("[*] 正在向渲染核心移交可视化图层准备生成预览图...")
-    fig, ax = plt.subplots(figsize=(10, 10), dpi=300)  # type: ignore
+    fig, ax = plt.subplots(figsize=(5, 10), dpi=300)  # type: ignore
     
-    plot_dict: dict[str, list[list[float]]] = {
-        "Background": [[], []],   
-        "DFN_Matrix": [[], []],   
-        "DFN_Asperity": [[], []], 
-        "DFN_Gouge": [[], []],    
-        "DFN_Node": [[], []]      
+    plot_dict: dict[str, list[Circle]] = {
+        "Background": [],   
+        "DFN_Matrix": [],   
+        "DFN_Asperity": [], 
+        "DFN_Gouge": [],    
+        "DFN_Node": []      
     }
     
     for obj in lines_data:
         if obj.get("type") == "particle":
             tag = cast(str, obj.get("tag")) if obj.get("tag") is not None else None
             
-            # 使用强类型收缩，抛弃运行时类型检查函数 float() 的约束矛盾报警
             val_x: float = cast(float, obj["x"])
             val_y: float = cast(float, obj["y"])
+            val_r: float = cast(float, obj["r"])
+            
+            circle = Circle((val_x, val_y), val_r)  # type: ignore
             
             if tag is None:
-                plot_dict["Background"][0].append(val_x)
-                plot_dict["Background"][1].append(val_y)
+                plot_dict["Background"].append(circle)
             else:
                 if tag in plot_dict: 
-                    plot_dict[tag][0].append(val_x)
-                    plot_dict[tag][1].append(val_y)
+                    plot_dict[tag].append(circle)
     
-    if plot_dict["Background"][0]:
-        ax.scatter(plot_dict["Background"][0], plot_dict["Background"][1], s=0.5, c='#E0E0E0', marker='o', label='Background', zorder=1)  # type: ignore
-    if plot_dict["DFN_Matrix"][0]:
-        ax.scatter(plot_dict["DFN_Matrix"][0], plot_dict["DFN_Matrix"][1], s=1.0, c='#87CEFA', marker='o', label='DFN_Matrix', zorder=2)  # type: ignore
-    if plot_dict["DFN_Asperity"][0]:
-        ax.scatter(plot_dict["DFN_Asperity"][0], plot_dict["DFN_Asperity"][1], s=1.0, c='#32CD32', marker='o', label='DFN_Asperity', zorder=3)  # type: ignore
-    if plot_dict["DFN_Gouge"][0]:
-        ax.scatter(plot_dict["DFN_Gouge"][0], plot_dict["DFN_Gouge"][1], s=1.0, c='#DC143C', marker='o', label='DFN_Gouge', zorder=4)  # type: ignore
-    if plot_dict["DFN_Node"][0]:
-        ax.scatter(plot_dict["DFN_Node"][0], plot_dict["DFN_Node"][1], s=3.0, c='#000000', marker='*', label='DFN_Node', zorder=5)  # type: ignore
+    colors_map = {
+        "Background": '#E0E0E0',
+        "DFN_Matrix": '#A6C4D9',
+        "DFN_Asperity": '#32CD32',
+        "DFN_Gouge": '#DC143C',
+        "DFN_Node": '#000000'
+    }
+    
+    zorders = {
+        "Background": 1,
+        "DFN_Matrix": 2,
+        "DFN_Asperity": 3,
+        "DFN_Gouge": 4,
+        "DFN_Node": 5
+    }
+    
+    for key, items in plot_dict.items():
+        if items:
+            collection = PatchCollection(items, facecolor=colors_map[key], edgecolor='#A0A0A0', linewidth=0.25, zorder=zorders[key], label=key)  # type: ignore
+            ax.add_collection(collection)  # type: ignore
 
     if fractures:
         segments: list[list[tuple[float, float]]] = []
@@ -288,33 +302,50 @@ def generate_preview_plot(lines_data: list[dict[str, ParticleValue]], fractures:
         ax.add_collection(lc)  # type: ignore
 
     ax.set_aspect('equal')  # type: ignore
-    ax.set_xlim(min_x, max_x)  # type: ignore
-    ax.set_ylim(min_y, max_y)  # type: ignore
-    ax.set_title("ZDEM Multi-Set Discrete Fracture Network Generative Module")  # type: ignore
+    ax.set_xlim(CROP_MIN_X, CROP_MAX_X)  # type: ignore
+    ax.set_ylim(CROP_MIN_Y, CROP_MAX_Y)  # type: ignore
+
+    # 学术级坐标轴与刻度精准控制
+    ax.set_xticks([3000, 4000, 5000, 6000])  # type: ignore
+    ax.set_yticks([3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000, 11000])  # type: ignore
+
+    ax.set_xlabel('X (m)', fontsize=12, fontweight='normal')  # type: ignore
+    ax.set_ylabel('Y (m)', fontsize=12, fontweight='normal')  # type: ignore
+    for spine in ax.spines.values():  # type: ignore
+        spine.set_linewidth(1.5)
+    ax.tick_params(axis='both', which='major', direction='in', length=6, width=1.5, labelsize=12, top=True, right=True)  # type: ignore
     
-    leg = ax.legend(loc='upper right', markerscale=5.0)  # type: ignore
-    for lh in leg.legend_handles:  # type: ignore
-        lh.set_alpha(1.0)  # type: ignore
+    import matplotlib.lines as mlines  # type: ignore
+    legend_elements = []  # type: ignore
+    for key in ["Background", "DFN_Matrix", "DFN_Asperity", "DFN_Gouge", "DFN_Node"]:
+        if plot_dict.get(key):
+            legend_elements.append(mlines.Line2D([], [], color=colors_map[key], marker='o', linestyle='None', markersize=10, label=key))  # type: ignore
+            
+    ax.legend(handles=legend_elements, loc='center left', bbox_to_anchor=(1.02, 0.5), fontsize=12, frameon=False)  # type: ignore
         
-    out_img = os.path.join(os.path.dirname(OUTPUT_FILE), "dfn_preview.png")
-    plt.tight_layout()  # type: ignore
-    plt.savefig(out_img)  # type: ignore
+    out_img = os.path.join(os.getcwd(), "dfn_preview.png")
+    plt.savefig(out_img, dpi=300, bbox_inches='tight')  # type: ignore
     plt.close(fig)  # type: ignore
     print(f"    - 高品质演示汇报图像已落地：{out_img}")
 
 def main():
     print("="*60)
-    print(" ZDEM 高级离散元生成前处理 - 混合多组系 T/X 网络引擎")
+    print(" ZDEM 高级离散元就地解析前处理 - 混合多组系 T/X 网络双边引擎")
     print("="*60)
     
     start_time = time.time()
     
-    if not os.path.exists(INPUT_FILE):
-        print(f"[严重错误] 未能找到输入文件：{INPUT_FILE}")
+    if not TARGET_DIRECTORIES:
+        print("[错误] TARGET_DIRECTORIES 为空，未设防工作簇。")
+        return
+        
+    reference_dir = TARGET_DIRECTORIES[0]
+    ref_input_file = os.path.join(reference_dir, SOURCE_FILENAME)
+    if not os.path.exists(ref_input_file):
+        print(f"[严重错误] 未能找到作为基准物理边际刻画的主参照系文件：{ref_input_file}")
         return
 
-    print(f"[*] 正在吞吐并缓存物理颗粒基站空间文件 '{INPUT_FILE}'...")
-    lines_data: list[dict[str, ParticleValue]] = []      
+    print(f"[*] 【全局一阶段】 正在从主坐标系汲取宏观基底场信息 '{ref_input_file}'...")
     min_x: float = float('inf')
     max_x: float = float('-inf')
     min_y: float = float('inf')
@@ -323,31 +354,18 @@ def main():
     sum_diameter: float = 0.0
     valid_p_count: int = 0
     
-    with open(INPUT_FILE, "r", encoding="utf-8") as f:
+    with open(ref_input_file, "r", encoding="utf-8") as f:
         for line in f:
             raw = line.rstrip('\n')
             if not raw.strip():
-                lines_data.append({"type": "empty", "raw": raw})
                 continue
-            
             parts = raw.split()
             if len(parts) >= 3:
                 try:
                     x_val: float = float(parts[0])
                     y_val: float = float(parts[1])
                     r_val: float = float(parts[2])
-                    
                     valid_p_count += 1
-                    
-                    lines_data.append({
-                        "type": "particle", 
-                        "raw": raw,
-                        "p_id": valid_p_count, 
-                        "x": x_val, "y": y_val, "r": r_val,
-                        "intersect_count": 0,
-                        "tag": None
-                    })
-                    
                     min_x = min(min_x, x_val)
                     max_x = max(max_x, x_val)
                     min_y = min(min_y, y_val)
@@ -355,128 +373,148 @@ def main():
                     max_r = max(max_r, r_val)
                     sum_diameter += (2.0 * r_val)
                 except ValueError:
-                    lines_data.append({"type": "header", "raw": raw})
-            else:
-                lines_data.append({"type": "header", "raw": raw})
-                
+                    pass
+
     if valid_p_count == 0:
-        print("[错误] 未能从文件中解析出有效的颗粒坐标群。")
+        print("[错误] 未能从参照体系中剥离出微结构颗粒簇。")
         return
+
+    # [强行覆盖机制] - 启动核心区绝对裁剪机制
+    print(f"\n[*] 源文件真实检测区域 => X: {min_x:.3f}~{max_x:.3f}, Y: {min_y:.3f}~{max_y:.3f}")
+    min_x = CROP_MIN_X
+    max_x = CROP_MAX_X
+    min_y = CROP_MIN_Y
+    max_y = CROP_MAX_Y
+    print(f"[*] 【强制覆写】已应用 CROP 常量截断矩阵视野至纯核工区：")
+    print(f"    -> 裁切后工作区 => X: {min_x:.3f}~{max_x:.3f}, Y: {min_y:.3f}~{max_y:.3f}")
 
     avg_diameter: float = sum_diameter / valid_p_count
     model_width: float = max_x - min_x
     model_height: float = max_y - min_y
     model_area: float = model_width * model_height
 
-    print(f"    - 模型系统鉴定内部颗粒基量: {valid_p_count} 颗")
     print(f"    - 参数校勘整体圆球半径均标: {avg_diameter:.6f}")
-    print(f"    - 面板二次元面积包围测录值: {model_area:.6f} (X: {min_x:.3f}~{max_x:.3f}, Y: {min_y:.3f}~{max_y:.3f})")
+    print(f"    - 重构后面板二次元面积包围测录值: {model_area:.6f}")
 
-    print("\n[*] 正在由 FRACTURE SETS 内置多动力学矩阵约束下产生深渊断层体 (DFN)...")
+    print(f"\n[*] 【全局二阶段】 生成全局唯一确定的几何骨架 (Fracture Set)...")
     fractures, num_fractures = generate_dfn_network(
         model_area, min_x, max_x, min_y, max_y, avg_diameter)
-    print(f"    - 数据总线历经拦截机制后确立并存活实体断裂线条数: {num_fractures} 条")
+    print(f"    - 时空锁定，断层网络已全息投影生成完毕 (共 {num_fractures} 条主干节)。")
 
-    print("\n[*] 正在针对碰撞事件搭建前途无量的哈希虚拟锚定场网格 (Hash Grid)...")
+    print("\n[*] 【全局三阶段】 进入围岩批次循环系统就地解析...")
     reference_length_base: float = avg_diameter * cast(float, FRACTURE_SETS[0]["length_mult"])
     grid_cell_size: float = reference_length_base * 1.5
-    hash_grid: dict[tuple[int, int], list[int]] = defaultdict(list)
+    last_lines_data: list[dict[str, ParticleValue]] | None = None
     
-    for idx, p in enumerate(lines_data):
-        if p.get("type") == "particle":
-            base_px: float = cast(float, p["x"])  
-            base_py: float = cast(float, p["y"])  
-            base_gx: int = int(base_px // grid_cell_size)  
-            base_gy: int = int(base_py // grid_cell_size)  
-            hash_grid[(base_gx, base_gy)].append(idx)
+    for folder in tqdm(TARGET_DIRECTORIES, desc="围压矩阵批处理就地解析"):
+        if not os.path.exists(folder):
+            print(f"[节点跳过] 找不到指定的围压容器文件夹：{folder}")
+            continue
             
-    print(f"    - 单元尺寸规格敲定完结: {grid_cell_size:.6f}")
-    print(f"    - 全部颗粒矩阵已被捕获映射进高速容器。")
-
-    print("\n[*] 即将发起暴力美学的几何光线投射并开展极速切分判别...")
-    for (x1, y1), (x2, y2) in fractures:
-        search_min_x: float = min(x1, x2) - max_r
-        search_max_x: float = max(x1, x2) + max_r
-        search_min_y: float = min(y1, y2) - max_r
-        search_max_y: float = max(y1, y2) + max_r
+        curr_input_path = os.path.join(folder, SOURCE_FILENAME)
+        curr_output_path = os.path.join(folder, TARGET_FILENAME)
         
-        sgx: int = int(search_min_x // grid_cell_size)
-        egx: int = int(search_max_x // grid_cell_size)
-        sgy: int = int(search_min_y // grid_cell_size)
-        egy: int = int(search_max_y // grid_cell_size)
+        if not os.path.exists(curr_input_path):
+            print(f"    -> [缺失] 当前矩阵槽内缺乏源文件：{curr_input_path}")
+            continue
+            
+        print(f"\n    >> 正在切入处理流：{folder}")
+        curr_lines_data: list[dict[str, ParticleValue]] = []
+        curr_valid_p_count = 0
         
-        for gx in range(sgx, egx + 1):
-            for gy in range(sgy, egy + 1):
-                if (gx, gy) in hash_grid:
-                    for p_idx in hash_grid[(gx, gy)]:
-                        target_p = lines_data[p_idx]
-                        pt_x: float = cast(float, target_p["x"])  
-                        pt_y: float = cast(float, target_p["y"])  
-                        pt_r: float = cast(float, target_p["r"])  
-                        dist: float = point_to_segment_distance(pt_x, pt_y, x1, y1, x2, y2)
-                        if dist <= pt_r: 
-                            target_p["intersect_count"] = cast(int, target_p.get("intersect_count", 0)) + 1  
-
-    print("[*] 面向微颗粒开展多元离散强度材料印戳赋值判定系统...")
-    stat_tags: dict[str, int] = {
-        'DFN_Node': 0,
-        'DFN_Asperity': 0,
-        'DFN_Matrix': 0,
-        'DFN_Gouge': 0
-    }
-    
-    tag_id_collections: dict[str, list[int]] = {
-        'DFN_Node': [],
-        'DFN_Asperity': [],
-        'DFN_Matrix': [],
-        'DFN_Gouge': []
-    }
-    
-    for p in lines_data:
-        if p.get("type") == "particle":
-            intersect_cnt: int = cast(int, p.get("intersect_count", 0)) 
-            if intersect_cnt > 0:
-                tag: str | None = None
-                
-                if ENABLE_NODE_PENALTY and intersect_cnt >= 2: 
-                    tag = "DFN_Node"
+        with open(curr_input_path, "r", encoding="utf-8") as f:
+            for line in f:
+                raw = line.rstrip('\n')
+                if not raw.strip():
+                    curr_lines_data.append({"type": "empty", "raw": raw})
+                    continue
+                parts = raw.split()
+                if len(parts) >= 3:
+                    try:
+                        x_val = float(parts[0])
+                        y_val = float(parts[1])
+                        r_val = float(parts[2])
+                        curr_valid_p_count += 1
+                        curr_lines_data.append({
+                            "type": "particle", 
+                            "raw": raw,
+                            "p_id": curr_valid_p_count, 
+                            "x": x_val, "y": y_val, "r": r_val,
+                            "intersect_count": 0,
+                            "tag": None
+                        })
+                    except ValueError:
+                        curr_lines_data.append({"type": "header", "raw": raw})
                 else:
-                    if ENABLE_HETEROGENEOUS:
-                        rand_val: float = random.random()
-                        if rand_val < PROB_ASPERITY:
-                            tag = "DFN_Asperity"
-                        elif rand_val < PROB_ASPERITY + PROB_MATRIX:
-                            tag = "DFN_Matrix"
-                        else:
-                            tag = "DFN_Gouge"
+                    curr_lines_data.append({"type": "header", "raw": raw})
+                    
+        hash_grid: dict[tuple[int, int], list[int]] = defaultdict(list)
+        for idx, p in enumerate(curr_lines_data):
+            if p.get("type") == "particle":
+                base_px: float = cast(float, p["x"])  
+                base_py: float = cast(float, p["y"])  
+                base_gx: int = int(base_px // grid_cell_size)  
+                base_gy: int = int(base_py // grid_cell_size)  
+                hash_grid[(base_gx, base_gy)].append(idx)
+                
+        for (x1, y1), (x2, y2) in fractures:
+            search_min_x: float = min(x1, x2) - max_r
+            search_max_x: float = max(x1, x2) + max_r
+            search_min_y: float = min(y1, y2) - max_r
+            search_max_y: float = max(y1, y2) + max_r
+            
+            sgx: int = int(search_min_x // grid_cell_size)
+            egx: int = int(search_max_x // grid_cell_size)
+            sgy: int = int(search_min_y // grid_cell_size)
+            egy: int = int(search_max_y // grid_cell_size)
+            
+            for gx in range(sgx, egx + 1):
+                for gy in range(sgy, egy + 1):
+                    if (gx, gy) in hash_grid:
+                        for p_idx in hash_grid[(gx, gy)]:
+                            target_p = curr_lines_data[p_idx]
+                            pt_x: float = cast(float, target_p["x"])  
+                            pt_y: float = cast(float, target_p["y"])  
+                            pt_r: float = cast(float, target_p["r"])  
+                            dist: float = point_to_segment_distance(pt_x, pt_y, x1, y1, x2, y2)
+                            if dist <= pt_r: 
+                                target_p["intersect_count"] = cast(int, target_p.get("intersect_count", 0)) + 1  
+                                
+        stat_tags: dict[str, int] = {
+            'DFN_Node': 0, 'DFN_Asperity': 0, 'DFN_Matrix': 0, 'DFN_Gouge': 0
+        }
+        
+        for p in curr_lines_data:
+            if p.get("type") == "particle":
+                intersect_cnt: int = cast(int, p.get("intersect_count", 0)) 
+                if intersect_cnt > 0:
+                    tag: str | None = None
+                    if ENABLE_NODE_PENALTY and intersect_cnt >= 2: 
+                        tag = "DFN_Node"
                     else:
-                        tag = "DFN_Matrix"
+                        if ENABLE_HETEROGENEOUS:
+                            rand_val: float = random.random()
+                            if rand_val < PROB_ASPERITY: tag = "DFN_Asperity"
+                            elif rand_val < PROB_ASPERITY + PROB_MATRIX: tag = "DFN_Matrix"
+                            else: tag = "DFN_Gouge"
+                        else:
+                            tag = "DFN_Matrix"
+                    p["tag"] = tag
+                    if tag is not None:
+                        stat_tags[tag] = stat_tags.get(tag, 0) + 1
                         
-                p["tag"] = tag
-                if tag in stat_tags:
-                    stat_tags[tag] += 1
-                    tag_id_collections[tag].append(cast(int, p["p_id"])) 
-
-    output_zdem_commands(OUTPUT_FILE, tag_id_collections)
-    generate_preview_plot(lines_data, fractures, min_x, max_x, min_y, max_y)
+        print(f"       -> 当地切中有效颗粒总计: {sum(stat_tags.values())}")
+        output_tagged_coordinates(curr_output_path, curr_lines_data)
+        last_lines_data = curr_lines_data
+        
+    print("\n[*] 【全局四阶段】 影像学构建收尾...")
+    if last_lines_data is not None:
+        generate_preview_plot(last_lines_data, fractures, min_x, max_x, min_y, max_y)
 
     elapsed_time = time.time() - start_time
-    
     print("\n" + "="*60)
-    print(" 生成统计汇总报告")
+    print(f"  ● 地壳破碎再造引擎，批调解析历时总计: {elapsed_time:.3f} 秒")
     print("="*60)
-    print(f"  ● 高度断裂交叉集射点 (DFN_Node):    {stat_tags['DFN_Node']}")
-    if ENABLE_HETEROGENEOUS:
-        print(f"  ● 闭锁抗剪切强结构面 (DFN_Asperity): {stat_tags['DFN_Asperity']}")
-        print(f"  ● 一般性基岩摩擦弱面 (DFN_Matrix):    {stat_tags['DFN_Matrix']}")
-        print(f"  ● 深厚高滑移断层碎泥 (DFN_Gouge):    {stat_tags['DFN_Gouge']}")
-    else:
-        print(f"  ● 平层通用弱属性弱面 (DFN_Matrix):    {stat_tags['DFN_Matrix']}")
-        
-    print(f"  ● 切准并下发状态签的全部颗粒总计:     {sum(stat_tags.values())}")
-    print(f"  ● 并发全链路时间开销结算:           {elapsed_time:.3f} 秒")
-    print("="*60)
-    print(" >>> 地壳破碎再造引擎，使命圆满归宿。")
 
 if __name__ == "__main__":
     main()
