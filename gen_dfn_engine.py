@@ -434,10 +434,14 @@ def main():
                         x_val = float(parts[0])
                         y_val = float(parts[1])
                         r_val = float(parts[2])
+                        
+                        # 强行清洗掉历史运行遗留的 Tag 尾巴，只保留 X Y R，并恢复其科学计数法格式，确保其和原始文件保持一致
+                        clean_raw = f"{x_val:.12e}  {y_val:.12e}  {r_val:.12e}" 
+                        
                         curr_valid_p_count += 1
                         curr_lines_data.append({
                             "type": "particle", 
-                            "raw": raw,
+                            "raw": clean_raw,  # <--- 使用清洗后的纯净字符串
                             "p_id": curr_valid_p_count, 
                             "x": x_val, "y": y_val, "r": r_val,
                             "intersect_count": 0,
