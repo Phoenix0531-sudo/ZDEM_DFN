@@ -2,6 +2,12 @@
 
 # ZDEM DFN · 离散裂隙网络生成引擎
 
+**Discrete Fracture Network generation engine for ZDEM simulations**
+
+[English](README.md) | [中文](README.zh-CN.md)
+
+![CI](https://github.com/Phoenix0531-sudo/ZDEM_DFN/actions/workflows/ci.yml/badge.svg)
+
 **Discrete Fracture Network Generation Engine for ZDEM Simulations**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
