@@ -1,56 +1,46 @@
 # ZDEM DFN
 
-**Discrete Fracture Network generator for ZDEM particle packs**
+**Discrete Fracture Network generator helpers for ZDEM workflows.**
 
 [English](README.md) | [中文](README.zh-CN.md)
 
-![CI](https://github.com/Phoenix0531-sudo/ZDEM_DFN/actions/workflows/ci.yml/badge.svg)
-![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)
+[![CI](https://github.com/Phoenix0531-sudo/ZDEM_DFN/actions/workflows/ci.yml/badge.svg)](https://github.com/Phoenix0531-sudo/ZDEM_DFN/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/)
 
-ZDEM DFN generates **discrete fracture networks** over ZDEM-style particle initial packs (`ini_xyr.dat`), for rock-mechanics / DEM pre-processing.
+Discrete Fracture Network generator helpers for ZDEM workflows.
 
-The engine is `zdem_dfn/engine.py` with multi-set fracture controls, optional heterogeneous modes, and matplotlib diagnostics. Console entry: `zdem-dfn` after install.
+Build fracture sets you can feed into DEM models.
 
-## Why this exists
-
-Building DFN by hand inside each experiment folder does not scale. This package centralizes generation parameters and batch targets for ZDEM workflows.
 
 ## Features
 
-- Read/write ZDEM-oriented particle init files
-- Multiple fracture sets with length / orientation statistics
-- Crop window for a “safe” generation region
-- Progress via `tqdm`; optional matplotlib previews
-- Installable console script `zdem-dfn`
+- 🪓 DFN generation helpers under `zdem_dfn/`
+- 🔌 ZDEM-oriented export conventions
+- ✅ CI + tests
 
-## Install
+## Get started
+
+### Install
 
 ```bash
 git clone https://github.com/Phoenix0531-sudo/ZDEM_DFN.git
 cd ZDEM_DFN
 pip install -r requirements.txt
-pip install -e .
 ```
 
-## Usage
-
-1. Point `TARGET_DIRECTORIES` / source filename constants in `zdem_dfn/engine.py` at your experiment folders (or call the engine API from a small driver script).
-2. Run:
+### Usage
 
 ```bash
-zdem-dfn
-# or
-python -m zdem_dfn.engine
+python -m zdem_dfn --help  # if available
+pytest tests/
 ```
-
-Expect `ini_xyr.dat`-style inputs; adjust crop bounds (`CROP_MIN_X` …) to your model domain.
 
 ## Project layout
 
 ```
-zdem_dfn/engine.py
-setup.py            # entry point zdem-dfn
-tests/
+zdem_dfn/
+tests/  docs/
 ```
 
 ## Related ZDEM tools
@@ -66,6 +56,11 @@ tests/
 | [ZDEM_Model_Editor](https://github.com/Phoenix0531-sudo/ZDEM_Model_Editor) | Model file visual editor |
 | [ZDEM_Archiver](https://github.com/Phoenix0531-sudo/ZDEM_Archiver) | Purge / archive bulky simulation dumps |
 | [ZDEM3D_WEB](https://github.com/Phoenix0531-sudo/ZDEM3D_WEB) | CAE cloud UI (Django + React + VTK.js) |
+
+## Notes
+
+Generator utility — validate against your model geometry constraints.
+
 ## License
 
-MIT. Free for commercial use with attribution. See [LICENSE](LICENSE).
+MIT. Free for commercial use with attribution where applicable. See [LICENSE](LICENSE).
