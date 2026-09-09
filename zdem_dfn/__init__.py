@@ -7,5 +7,5 @@ Generates multi-set discrete fracture networks (DFN) for ZDEM simulations,
 with particle tagging (matrix/asperity/gouge/node) and preview visualization.
 """
 
-__version__ = "1.0.0"
+__version__ = "1.1.0"
 __license__ = "MIT"
