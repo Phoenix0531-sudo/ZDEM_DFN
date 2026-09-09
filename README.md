@@ -28,20 +28,40 @@ git clone https://github.com/Phoenix0531-sudo/ZDEM_DFN.git
 cd ZDEM_DFN
 pip install -r requirements.txt
 
-# 1. Point TARGET_DIRECTORIES at folders that each contain a ZDEM
-#    particle file (ini_xyr.dat); tune SOURCE_FILENAME and the
-#    ENABLE_* toggles at the top of zdem_dfn/engine.py.
-# 2. Batch-process every folder in place and drop a preview image:
+# Batch-process folders (each containing a ZDEM particle file ini_xyr.dat),
+# rewriting them in place and dropping a preview image:
+python -m zdem_dfn --dirs path/to/spec1 path/to/spec2 --seed 42
+
+# Or point the defaults at your folders in zdem_dfn/config.py
+# (TARGET_DIRECTORIES / SOURCE_FILENAME / ENABLE_* toggles), then:
 python -m zdem_dfn
+
+# Validate / inspect without writing anything:
+python -m zdem_dfn --dirs path/to/spec1 --dry-run
 
 pytest tests/
 ```
 
 The engine reads each target folder's `ini_xyr.dat` (initial particle
 positions), generates the fracture network, rewrites the file in place,
-and saves `dfn_preview.png` to the current directory. Default
+and saves `dfn_preview.png` (or `--out PATH`) with tagged particles. Default
 `TARGET_DIRECTORIES` point at the author's local specimen folders —
-edit them before running.
+override them with `--dirs` or edit `zdem_dfn/config.py`.
+
+### Package layout
+
+Since v1.1 the engine is split into single-responsibility modules;
+`zdem_dfn/engine.py` remains as a compatibility facade:
+
+| Module | Responsibility |
+|---|---|
+| `config.py` | Constants, toggles, fracture set definitions (runtime override point) |
+| `geometry.py` | Pure geometry: point-segment distance, Cohen–Sutherland clipping, intersection |
+| `dfn.py` | Stochastic fracture network generation (log-normal lengths, dip sets, truncation) |
+| `io.py` | `ini_xyr.dat` parsing + tagged in-place rewrite |
+| `sampling.py` | Particle-fracture tagging with hash-grid acceleration |
+| `plotting.py` | Preview rendering (matplotlib) |
+| `main.py` | Batch orchestration + CLI (`--dirs/--out/--seed/--dry-run/--version`) |
 
 Pairs with Model Editor (manual structure) and ParticleTracker (post-run geometry).
 
