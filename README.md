@@ -11,6 +11,14 @@ Build stochastic or controlled **fracture sets** and export conventions oriented
 
 ## Preview
 
+`dfn_preview.png` as actually written by `python -m zdem_dfn`, rendered
+here from a **synthetic demo specimen** (script-generated staggered particle
+packing — not laboratory data):
+
+![dfn_preview.png rendered from synthetic demo data](docs/screenshots/dfn_preview_demo.png)
+
+Concept schematic (illustration, not engine output):
+
 ![ZDEM DFN](docs/screenshots/preview.png)
 
 ## Install / run

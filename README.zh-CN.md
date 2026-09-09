@@ -9,6 +9,17 @@
 
 包在 `zdem_dfn/`。生成后按实验盒子几何自行校验，再导入 DEM。
 
+## 预览
+
+`python -m zdem_dfn` 实际落地的 `dfn_preview.png`，由**合成演示数据**
+（脚本生成的交错颗粒填充，非实验数据）渲染：
+
+![合成演示数据渲染的 dfn_preview.png](docs/screenshots/dfn_preview_demo.png)
+
+概念示意图（Illustration，非引擎输出）：
+
+![ZDEM DFN](docs/screenshots/preview.png)
+
 ```bash
 pip install -r requirements.txt
 
