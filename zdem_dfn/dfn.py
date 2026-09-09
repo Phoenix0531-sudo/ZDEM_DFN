@@ -6,7 +6,7 @@ from typing import cast
 
 from tqdm import tqdm
 
-from zdem_dfn.config import FRACTURE_SETS
+from zdem_dfn import config as _config
 from zdem_dfn.geometry import clip_line_segment, get_segment_intersection
 
 
@@ -20,7 +20,7 @@ def generate_dfn_network(area: float, min_x: float, max_x: float, min_y: float, 
     height: float = max_y - min_y
     circumcircle_radius: float = math.hypot(width / 2.0, height / 2.0)
 
-    for fset in FRACTURE_SETS:
+    for fset in _config.FRACTURE_SETS:
         # 使用强类型转换消灭 IDE 冲突
         p21: float = cast(float, fset["p21"])
         length_mult: float = cast(float, fset["length_mult"])
