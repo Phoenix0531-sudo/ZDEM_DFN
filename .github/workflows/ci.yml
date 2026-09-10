@@ -78,3 +78,34 @@ jobs:
         run: |
           uv run pip install pip-audit
           uv run pip-audit || true
+
+  package:
+    name: Packaging (wheel build + clean install)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Build sdist + wheel
+        run: uv build
+
+      - name: Install wheel into clean venv
+        run: |
+          uv venv .pkg-venv
+          uv pip install --python .pkg-venv/bin/python dist/*.whl
+
+      - name: Smoke test installed package
+        run: |
+          .pkg-venv/bin/python -c "from zdem_dfn import config, dfn, engine, geometry, io, main, plotting, sampling"
+          .pkg-venv/bin/python -m zdem_dfn --version
+          test -f dist/zdem_dfn-*.tar.gz
