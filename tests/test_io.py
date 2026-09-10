@@ -1,5 +1,4 @@
 """io 模块单测：ini_xyr.dat 解析、基准统计、带标签就地输出。"""
-import random
 
 from zdem_dfn.io import (
     avg_diameter_of,

@@ -1,7 +1,6 @@
 """Unit tests for pure geometry helpers in DFN engine."""
 from __future__ import annotations
 
-import math
 import sys
 from pathlib import Path
 

@@ -1,7 +1,6 @@
 """sampling 模块单测：相交语义（<=、逐裂隙计数）、节点惩罚、概率分带。"""
 import copy
 
-import pytest
 
 from zdem_dfn import config
 from zdem_dfn.sampling import (
