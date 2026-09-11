@@ -1,6 +1,11 @@
 .git
+.github
 .gitignore
+.dockerignore
 .env
+.venv/
+.pi/
+.skills/
 __pycache__/
 *.pyc
 node_modules/
@@ -11,3 +16,8 @@ target/
 .vscode/
 *.log
 tasks/
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+docs/
+examples/
