@@ -48,6 +48,17 @@ and saves `dfn_preview.png` (or `--out PATH`) with tagged particles. Default
 `TARGET_DIRECTORIES` point at the author's local specimen folders —
 override them with `--dirs` or edit `zdem_dfn/config.py`.
 
+### Data flow
+
+```mermaid
+flowchart LR
+    A[ini_xyr.dat<br/>x y r particle rows] --> B[io.py<br/>parse_particle_file]
+    B --> C[dfn.py<br/>generate_dfn_network<br/>seeded fracture sets]
+    C --> D[sampling.py<br/>hash-grid intersection<br/>particle tagging]
+    D --> E[io.py<br/>rewrite ini_xyr.dat<br/>+ tag suffix]
+    D --> F[plotting.py<br/>dfn_preview.png]
+```
+
 ### Package layout
 
 Since v1.1 the engine is split into single-responsibility modules;

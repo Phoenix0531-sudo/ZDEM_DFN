@@ -41,6 +41,17 @@ pytest tests/
 默认 `TARGET_DIRECTORIES` 指向作者本机样品目录——用 `--dirs` 覆盖，或编辑
 `zdem_dfn/config.py`。
 
+### 数据流
+
+```mermaid
+flowchart LR
+    A[ini_xyr.dat<br/>x y r 颗粒行] --> B[io.py<br/>parse_particle_file]
+    B --> C[dfn.py<br/>generate_dfn_network<br/>种子化组系生成]
+    C --> D[sampling.py<br/>网格哈希求交<br/>颗粒标记]
+    D --> E[io.py<br/>重写 ini_xyr.dat<br/>+ 标签后缀]
+    D --> F[plotting.py<br/>dfn_preview.png]
+```
+
 ### 包结构
 
 v1.1 起引擎拆分为职责单一的模块；`zdem_dfn/engine.py` 保留为兼容门面：
