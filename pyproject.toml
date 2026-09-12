@@ -1,6 +1,6 @@
 [project]
 name = "zdem-dfn"
-version = "1.1.0"
+version = "1.1.1"
 description = "Discrete fracture network (DFN) generator for ZDEM discrete element simulations"
 readme = "README.md"
 license = { file = "LICENSE" }

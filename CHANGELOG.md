@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.1] - 2026-09-12
+
+### Added
+- mkdocs-material documentation site (CLI guide, fracture-set configuration, auto-generated API reference) deployed to GitHub Pages on every push to `main`
+- Coverage pipeline: pytest-cov job in CI (96% line coverage), XML artifact upload and a self-hosted shields badge on the `badges` branch
+- Parameter gallery: `python examples/gallery.py` renders the same synthetic specimen under four `config.FRACTURE_SETS` configurations (embedded in both READMEs)
+- Community health files: `CITATION.cff` (GitHub "Cite this repository"), `CONTRIBUTING.md`, `SECURITY.md`, issue templates (bug/feature), PR template
+- PyPI publish workflow (`publish.yml`) building sdist + wheel on release tags via trusted publishing
+
+### Changed
+- `pyproject.toml` is now the single source of truth: real description, license/readme metadata, `zdem-dfn` console script, unified dev deps (pytest, pytest-cov, ruff); `setup.py` and `requirements.txt` removed
+- Ruff rule set enforced repo-wide (E4/E7/E9/F/I/B/UP) with per-file ignores for the sys.path preamble in examples/tests; 13 findings fixed
+- READMEs: coverage/docs badges, parameter gallery, documentation-site link, citation section, mermaid data-flow diagram
+
+### Removed
+- `docs/screenshots/preview.png` decorative schematic and `.gitkeep` placeholder — README now shows only genuine engine output
+
 ## [1.1.0] - 2026-09-09
 
 ### Added
