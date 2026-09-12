@@ -1,0 +1,55 @@
+name: Bug report
+description: Something broke or behaves unexpectedly
+labels: [bug]
+body:
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: A clear description of the unexpected behavior.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: How to reproduce
+      description: The exact command, e.g. `python -m zdem_dfn --dirs path/to/spec --seed 42`
+      placeholder: |
+        python -m zdem_dfn --dirs path/to/spec --seed 42
+      render: bash
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: OS
+    validations:
+      required: true
+  - type: input
+    id: python-version
+    attributes:
+      label: Python version
+      placeholder: "3.11"
+    validations:
+      required: true
+  - type: input
+    id: package-version
+    attributes:
+      label: zdem-dfn version
+      description: Output of `python -m zdem_dfn --version`
+      placeholder: "1.1.0"
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: |
+        `--dry-run` output or a minimal failing input help a lot.
+        Do NOT paste proprietary experiment data or confidential absolute paths.

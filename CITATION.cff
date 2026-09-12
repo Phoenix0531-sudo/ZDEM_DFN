@@ -1,0 +1,22 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "ZDEM_DFN: Discrete Fracture Network Generator for ZDEM Discrete Element Simulations"
+authors:
+  - alias: Phoenix0531-sudo
+version: 1.1.0
+date-released: "2026-09-11"
+license: MIT
+repository-code: "https://github.com/Phoenix0531-sudo/ZDEM_DFN"
+keywords:
+  - discrete fracture network
+  - DFN
+  - discrete element method
+  - rock mechanics
+  - fracture
+  - ZDEM
+abstract: >-
+  A stochastic discrete fracture network (DFN) generator for ZDEM
+  discrete element simulations. Generates multi-set fracture networks
+  with log-normal trace lengths, per-set dip orientation and p21
+  intensity, T-intersection truncation, seeded reproducibility, and
+  hash-grid-accelerated particle-fracture tagging.

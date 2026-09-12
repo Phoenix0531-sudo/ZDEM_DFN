@@ -1,0 +1,30 @@
+name: Feature request
+description: Propose an improvement or new capability
+labels: [enhancement]
+body:
+  - type: textarea
+    id: use-case
+    attributes:
+      label: Geoscience use case
+      description: What ZDEM modeling workflow does this help with? The maintenance bar is "does this help ZDEM model workflows?"
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behavior
+      description: What should the interface look like (CLI flags, config keys, outputs)?
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checklist
+      options:
+        - label: I checked existing issues and this is not a duplicate
+          required: true
+        - label: I am willing to help test or implement this
