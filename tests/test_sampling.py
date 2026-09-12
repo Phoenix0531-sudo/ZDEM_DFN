@@ -1,7 +1,6 @@
 """sampling 模块单测：相交语义（<=、逐裂隙计数）、节点惩罚、概率分带。"""
 import copy
 
-
 from zdem_dfn import config
 from zdem_dfn.sampling import (
     apply_fracture_tagging,
@@ -66,6 +65,7 @@ def test_heterogeneous_probability_bands(monkeypatch):
     lines = [_p(1, 500.0, 500.0, 10.0)]
     stats = apply_fracture_tagging(lines, H_FRAC, grid_cell_size=100.0, max_r=10.0)
     assert lines[0]["tag"] == "DFN_Gouge"
+    assert stats["DFN_Gouge"] == 1
 
 
 def test_grid_matches_bruteforce(monkeypatch):
@@ -86,7 +86,7 @@ def test_grid_matches_bruteforce(monkeypatch):
     b = copy.deepcopy(base)
     process_single_folder_lines(fracs, b)
 
-    for pa, pb in zip(a, b):
+    for pa, pb in zip(a, b, strict=True):
         assert pa["intersect_count"] == pb["intersect_count"]
         assert pa["tag"] == pb["tag"]
 

@@ -8,7 +8,7 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from zdem_dfn.engine import point_to_segment_distance, _compute_outcode, INSIDE, LEFT, RIGHT
+from zdem_dfn.engine import INSIDE, LEFT, RIGHT, _compute_outcode, point_to_segment_distance
 
 
 def test_point_on_segment_is_zero():

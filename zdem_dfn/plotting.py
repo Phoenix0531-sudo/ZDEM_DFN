@@ -20,11 +20,12 @@ def generate_preview_plot(lines_data: list[dict[str, ParticleValue]],
     out_path 为 None 时保持旧行为：写入当前工作目录的 dfn_preview.png。
     """
     # 延迟导入：让 CLI --help / --dry-run 不必拉起 matplotlib 全家桶
-    import matplotlib.pyplot as plt  # type: ignore
     import matplotlib.collections as mcoll  # type: ignore
     import matplotlib.lines as mlines  # type: ignore
-    from matplotlib.patches import Circle  # type: ignore
+    import matplotlib.pyplot as plt  # type: ignore
     from matplotlib.collections import PatchCollection  # type: ignore
+    from matplotlib.patches import Circle  # type: ignore
+
     from zdem_dfn import config as _config
 
     print("[*] 正在向渲染核心移交可视化图层准备生成预览图...")

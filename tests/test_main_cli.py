@@ -76,7 +76,7 @@ def test_run_batch_end_to_end(tmp_path):
 
     text = p.read_text(encoding="utf-8").splitlines()
     assert text[0] == "# synthetic test specimen"
-    tagged = [l for l in text if "\tDFN_" in l]
+    tagged = [line for line in text if "\tDFN_" in line]
     assert tagged, "应存在被裂隙切中的颗粒"
     for line in text[2:]:  # 粒行保持科学计数法
         assert "e+" in line.split("\t")[0]

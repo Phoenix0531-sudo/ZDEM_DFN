@@ -13,7 +13,7 @@ def parse_particle_file(input_path: str) -> list[dict[str, ParticleValue]]:
     """
     lines_data: list[dict[str, ParticleValue]] = []
     valid_p_count = 0
-    with open(input_path, "r", encoding="utf-8") as f:
+    with open(input_path, encoding="utf-8") as f:
         for line in f:
             raw = line.rstrip('\n')
             if not raw.strip():
@@ -59,7 +59,7 @@ def compute_reference_stats(ref_input_file: str) -> dict[str, float | int] | Non
     sum_diameter: float = 0.0
     valid_p_count: int = 0
 
-    with open(ref_input_file, "r", encoding="utf-8") as f:
+    with open(ref_input_file, encoding="utf-8") as f:
         for line in f:
             raw = line.rstrip('\n')
             if not raw.strip():

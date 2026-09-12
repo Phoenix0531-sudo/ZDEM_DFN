@@ -32,6 +32,7 @@ from zdem_dfn.config import (  # noqa: F401
     FractureValue,
     ParticleValue,
 )
+from zdem_dfn.dfn import generate_dfn_network  # noqa: F401
 from zdem_dfn.geometry import (  # noqa: F401
     BOTTOM,
     INSIDE,
@@ -43,17 +44,16 @@ from zdem_dfn.geometry import (  # noqa: F401
     get_segment_intersection,
     point_to_segment_distance,
 )
-from zdem_dfn.dfn import generate_dfn_network  # noqa: F401
 from zdem_dfn.io import (  # noqa: F401
     avg_diameter_of,
     compute_reference_stats,
     output_tagged_coordinates,
     parse_particle_file,
 )
+from zdem_dfn.main import main, run_batch  # noqa: F401
+from zdem_dfn.plotting import generate_preview_plot  # noqa: F401
 from zdem_dfn.sampling import (  # noqa: F401
     check_particles_overlap,
     process_single_folder_lines,
     random_tag_by_probability,
 )
-from zdem_dfn.plotting import generate_preview_plot  # noqa: F401
-from zdem_dfn.main import main, run_batch  # noqa: F401
