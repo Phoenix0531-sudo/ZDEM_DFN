@@ -5,6 +5,8 @@
 [English](README.md) | [中文](README.zh-CN.md)
 
 [![CI](https://github.com/Phoenix0531-sudo/ZDEM_DFN/actions/workflows/ci.yml/badge.svg)](https://github.com/Phoenix0531-sudo/ZDEM_DFN/actions/workflows/ci.yml)
+[![Coverage](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/Phoenix0531-sudo/ZDEM_DFN/badges/coverage.json)](https://github.com/Phoenix0531-sudo/ZDEM_DFN/actions/workflows/ci.yml)
+[![Docs](https://img.shields.io/badge/docs-mkdocs-8B0000.svg)](https://phoenix0531-sudo.github.io/ZDEM_DFN/)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 Build stochastic or controlled **fracture sets** and export conventions oriented to ZDEM model ingestion. Package lives under `zdem_dfn/`. Validate geometry against your experiment box before running DEM.
@@ -29,6 +31,15 @@ packing — not laboratory data):
 Concept schematic (illustration, not engine output):
 
 ![ZDEM DFN](docs/screenshots/preview.png)
+
+### Parameter gallery
+
+The same synthetic specimen under four `config.FRACTURE_SETS`
+configurations (default conjugate sets · single steep joint set · dense
+multi-directional web · sparse corridor faults) — rendered by
+`python examples/gallery.py`:
+
+![DFN parameter gallery](docs/screenshots/dfn_gallery.png)
 
 ## Install / run
 
@@ -134,10 +145,35 @@ Reproduce on your machine: `python examples/benchmark_sampling.py`.
 - **36 tests** (`pytest tests/`): parse round-trip, seeded byte-identical
   reruns, grid-vs-brute-force equivalence, geometry semantics, CLI exit
   codes, end-to-end pipeline.
-- **CI**: Python 3.10 / 3.13 matrix, lint, plus a packaging job
-  (wheel build → clean-venv install → import smoke test).
+- **CI**: Python 3.10 / 3.13 matrix, lint, coverage (badge above), plus a
+  packaging job (wheel build → clean-venv install → import smoke test).
 - The committed preview PNG is regenerated deterministically from
   synthetic data — see [examples/](examples/README.md).
+
+## Documentation
+
+An mkdocs-material site with CLI reference, configuration guide and an
+auto-generated API reference is built from `docs/` on every push to
+`main`: **<https://phoenix0531-sudo.github.io/ZDEM_DFN/>** (local preview:
+`mkdocs serve` after `pip install mkdocs-material "mkdocstrings[python]"
+mkdocs-gen-files mkdocs-literate-nav mkdocs-section-index`).
+
+## Citing
+
+If this package helps your research, cite it via the repository:
+
+```bibtex
+@misc{zdem_dfn,
+  title        = {ZDEM\_DFN: Discrete Fracture Network Generator for ZDEM Discrete Element Simulations},
+  author       = {Phoenix0531-sudo},
+  year         = {2026},
+  version      = {1.1.0},
+  url          = {https://github.com/Phoenix0531-sudo/ZDEM_DFN},
+}
+```
+
+(GitHub also exposes a "Cite this repository" button backed by
+`CITATION.cff`.)
 
 ## License
 

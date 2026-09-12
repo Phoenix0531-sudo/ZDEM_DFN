@@ -5,6 +5,8 @@
 [English](README.md) | [中文](README.zh-CN.md)
 
 [![CI](https://github.com/Phoenix0531-sudo/ZDEM_DFN/actions/workflows/ci.yml/badge.svg)](https://github.com/Phoenix0531-sudo/ZDEM_DFN/actions/workflows/ci.yml)
+[![Coverage](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/Phoenix0531-sudo/ZDEM_DFN/badges/coverage.json)](https://github.com/Phoenix0531-sudo/ZDEM_DFN/actions/workflows/ci.yml)
+[![Docs](https://img.shields.io/badge/docs-mkdocs-8B0000.svg)](https://phoenix0531-sudo.github.io/ZDEM_DFN/)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 包在 `zdem_dfn/`。生成后按实验盒子几何自行校验，再导入 DEM。
@@ -28,6 +30,12 @@
 概念示意图（Illustration，非引擎输出）：
 
 ![ZDEM DFN](docs/screenshots/preview.png)
+
+### 参数图库
+
+同一合成样品在四种 `config.FRACTURE_SETS` 配置下（默认共轭组系 · 单一陡倾角组系 · 密集多向网状 · 稀疏长廊道断层）——`python examples/gallery.py` 渲染：
+
+![DFN 参数图库](docs/screenshots/dfn_gallery.png)
 
 ## 安装 / 运行
 
@@ -124,9 +132,32 @@ v1.1 起引擎拆分为职责单一的模块；`zdem_dfn/engine.py` 保留为兼
 
 - **36 项测试**（`pytest tests/`）：解析回读、种子逐字节重跑一致性、
   网格与暴力法等价、几何语义、CLI 退出码、端到端管线。
-- **CI**：Python 3.10 / 3.13 矩阵、lint，外加打包任务
+- **CI**：Python 3.10 / 3.13 矩阵、lint、覆盖率（见顶部徽章），外加打包任务
   （wheel 构建 → 干净 venv 安装 → 导入冒烟）。
 - README 预览图由合成数据确定性重生成——见 [examples/](examples/README.md)。
+
+## 文档站
+
+mkdocs-material 文档站（CLI 参考、组系配置指南、自动生成 API 文档）随
+`main` 分支每次推送自动构建部署：
+**<https://phoenix0531-sudo.github.io/ZDEM_DFN/>**（本地预览：装好
+`mkdocs-material "mkdocstrings[python]" mkdocs-gen-files mkdocs-literate-nav
+mkdocs-section-index` 后运行 `mkdocs serve`）。
+
+## 引用
+
+若本包对你的研究有帮助，请引用本仓库（GitHub 的 "Cite this repository"
+按钮由 `CITATION.cff` 驱动）：
+
+```bibtex
+@misc{zdem_dfn,
+  title        = {ZDEM\_DFN: Discrete Fracture Network Generator for ZDEM Discrete Element Simulations},
+  author       = {Phoenix0531-sudo},
+  year         = {2026},
+  version      = {1.1.0},
+  url          = {https://github.com/Phoenix0531-sudo/ZDEM_DFN},
+}
+```
 
 ## 许可证
 
