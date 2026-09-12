@@ -27,10 +27,6 @@
 
 ![合成演示数据渲染的 dfn_preview.png](docs/screenshots/dfn_preview_demo.png)
 
-概念示意图（Illustration，非引擎输出）：
-
-![ZDEM DFN](docs/screenshots/preview.png)
-
 ### 参数图库
 
 同一合成样品在四种 `config.FRACTURE_SETS` 配置下（默认共轭组系 · 单一陡倾角组系 · 密集多向网状 · 稀疏长廊道断层）——`python examples/gallery.py` 渲染：
@@ -40,7 +36,7 @@
 ## 安装 / 运行
 
 ```bash
-pip install -r requirements.txt
+pip install .
 
 # 批处理各文件夹（每个含 ZDEM 颗粒文件 ini_xyr.dat），就地覆写并输出预览图：
 python -m zdem_dfn --dirs 路径/样品1 路径/样品2 --seed 42

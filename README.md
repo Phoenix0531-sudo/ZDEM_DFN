@@ -28,10 +28,6 @@ packing — not laboratory data):
 
 ![dfn_preview.png rendered from synthetic demo data](docs/screenshots/dfn_preview_demo.png)
 
-Concept schematic (illustration, not engine output):
-
-![ZDEM DFN](docs/screenshots/preview.png)
-
 ### Parameter gallery
 
 The same synthetic specimen under four `config.FRACTURE_SETS`
@@ -46,7 +42,7 @@ multi-directional web · sparse corridor faults) — rendered by
 ```bash
 git clone https://github.com/Phoenix0531-sudo/ZDEM_DFN.git
 cd ZDEM_DFN
-pip install -r requirements.txt
+pip install .
 
 # Batch-process folders (each containing a ZDEM particle file ini_xyr.dat),
 # rewriting them in place and dropping a preview image:
