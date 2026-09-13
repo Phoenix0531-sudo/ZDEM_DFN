@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Fixed
+- Professional plain-language output extended to `plotting.py` (preview/rose diagram progress messages)
+- Corrected exit-code documentation in `docs/usage.md` and `run_batch` docstring: `2` is the invalid flag combination (empty `--suffix` without `--in-place`), not "every directory missing"
+
 ### Added
 - **Rose diagrams** (`--rose PATH`): polar histogram of fracture strike (0–180°, 10° bins), dark-red bars matching the preview palette; works with `--dry-run`. Dip binning is shared with `--stats` via `compute_dip_bins`, so diagram and report always agree
 

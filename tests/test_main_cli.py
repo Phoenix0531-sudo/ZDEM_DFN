@@ -7,6 +7,22 @@ from zdem_dfn import config
 from zdem_dfn.main import build_arg_parser, main, run_batch
 
 
+def test_dunder_main_module_entry(tmp_path, monkeypatch):
+    """python -m zdem_dfn 入口：__main__.py 的 main 代理与 SystemExit 语义。"""
+    import subprocess
+    import sys
+
+    _make_specimen(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    proc = subprocess.run(
+        [sys.executable, "-m", "zdem_dfn", "--dirs", str(tmp_path),
+         "--seed", "7", "--out", str(tmp_path / "m.png")],
+        capture_output=True, text=True, timeout=120,
+    )
+    assert proc.returncode == 0, proc.stderr
+    assert (tmp_path / "m.png").exists()
+
+
 def _make_specimen(folder, n=40, seed=11):
     rng = random.Random(seed)
     p = folder / "ini_xyr.dat"

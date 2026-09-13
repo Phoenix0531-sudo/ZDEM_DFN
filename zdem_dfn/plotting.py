@@ -24,7 +24,7 @@ def generate_preview_plot(lines_data: list[dict[str, ParticleValue]],
 
     from zdem_dfn import config as _config
 
-    print("[*] 正在向渲染核心移交可视化图层准备生成预览图...")
+    print("[*] 正在生成预览图...")
     fig, ax = plt.subplots(figsize=(5, 10), dpi=300)
 
     plot_dict: dict[str, list[Circle]] = {
@@ -108,7 +108,7 @@ def generate_preview_plot(lines_data: list[dict[str, ParticleValue]],
     out_img = out_path if out_path is not None else os.path.join(os.getcwd(), "dfn_preview.png")
     plt.savefig(out_img, dpi=300, bbox_inches='tight')
     plt.close(fig)
-    print(f"    - 高品质演示汇报图像已落地：{out_img}")
+    print(f"    - 预览图已写入：{out_img}")
 
 
 def plot_rose_diagram(fractures: list[tuple[tuple[float, float], tuple[float, float]]],
@@ -152,4 +152,4 @@ def plot_rose_diagram(fractures: list[tuple[tuple[float, float], tuple[float, fl
     fig.tight_layout()
     plt.savefig(out_path, dpi=300, bbox_inches="tight")
     plt.close(fig)
-    print(f"    - 玫瑰图已落地：{out_path}")
+    print(f"    - 玫瑰图已写入：{out_path}")

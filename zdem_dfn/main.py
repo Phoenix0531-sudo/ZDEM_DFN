@@ -50,7 +50,7 @@ def run_batch(directories: list[str] | None = None,
     - stats_path:  非空时写网络统计报告（.csv → CSV，其余 Markdown）。
     - rose_path:   非空时写极坐标玫瑰图 PNG。
 
-    返回退出码（0 成功；1 配置错误；2 全部目录缺失）。
+    返回退出码（0 成功；1 配置错误；2 无效参数组合，如空 --suffix 未配 --in-place）。
     """
     print("=" * 60)
     print(" ZDEM DFN 前处理 - 多组系离散裂隙网络批处理")

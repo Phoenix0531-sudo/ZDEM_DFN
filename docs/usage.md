@@ -26,7 +26,8 @@ because it would silently overwrite the source.
 | `--version` | Print the version and exit |
 
 Exit codes: `0` success, `1` configuration error (no directories / missing
-reference file / no valid particles), `2` every target directory missing.
+reference file / no valid particles), `2` invalid argument combination (empty
+`--suffix` without `--in-place`).
 
 ## Fracture-set configuration
 
