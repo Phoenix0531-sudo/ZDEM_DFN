@@ -38,7 +38,8 @@
 ```bash
 pip install .
 
-# 批处理各文件夹（每个含 ZDEM 颗粒文件 ini_xyr.dat），就地覆写并输出预览图：
+# 批处理各文件夹（每个含 ZDEM 颗粒文件 ini_xyr.dat）。
+# 默认非破坏性：带标签颗粒写入 ini_xyr_dfn.dat，源文件保持不动，并输出预览图：
 python -m zdem_dfn --dirs 路径/样品1 路径/样品2 --seed 42
 
 # 或在 zdem_dfn/config.py 里把默认值指向你的文件夹
@@ -52,9 +53,10 @@ pytest tests/
 ```
 
 引擎读取各目标文件夹的 `ini_xyr.dat`（初始颗粒坐标），生成裂隙网络后
-就地覆写该文件，并输出带标签颗粒的 `dfn_preview.png`（或 `--out 路径`）。
-默认 `TARGET_DIRECTORIES` 指向作者本机样品目录——用 `--dirs` 覆盖，或编辑
-`zdem_dfn/config.py`。
+将带标签颗粒写入源文件旁的 `ini_xyr_dfn.dat`（除非显式传 `--in-place`，
+否则源文件永不被修改），并输出带标签颗粒的 `dfn_preview.png`（或
+`--out 路径`）。默认 `TARGET_DIRECTORIES` 指向作者本机样品目录——用
+`--dirs` 覆盖，或编辑 `zdem_dfn/config.py`。
 
 ### CLI 参数
 
@@ -63,6 +65,8 @@ pytest tests/
 | `--dirs 目录 [目录 …]` | 目标文件夹列表，各含一个 `ini_xyr.dat`（默认读 `config.TARGET_DIRECTORIES`） |
 | `--out 路径` | 预览图输出路径（默认当前目录下 `dfn_preview.png`） |
 | `--seed N` | 随机种子——同种子同网络 |
+| `--suffix STR` | 输出文件名后缀（默认 `_dfn` → `ini_xyr_dfn.dat`）；设为空串需配合 `--in-place` |
+| `--in-place` | 覆写源文件（旧版行为；默认关闭） |
 | `--dry-run` | 只解析与生成，不写文件、不渲染 |
 | `--version` | 打印版本号后退出 |
 

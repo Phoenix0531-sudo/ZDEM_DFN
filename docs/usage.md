@@ -4,14 +4,22 @@
 
 ```
 python -m zdem_dfn [--dirs DIR [DIR ...]] [--out PATH] [--seed SEED]
-                   [--dry-run] [--version]
+                   [--suffix STR] [--in-place] [--dry-run] [--version]
 ```
+
+Output is **non-destructive** by default: tagged particles are written to
+`<stem><suffix><ext>` next to the source file (default suffix `_dfn` →
+`ini_xyr_dfn.dat`); the source `ini_xyr.dat` is never modified unless
+`--in-place` is passed. An empty `--suffix` is refused without `--in-place`
+because it would silently overwrite the source.
 
 | Flag | Meaning |
 |---|---|
 | `--dirs DIR [DIR …]` | Target folders, each containing an `ini_xyr.dat` (default: `config.TARGET_DIRECTORIES`) |
 | `--out PATH` | Preview image output path (default `dfn_preview.png` in the current directory) |
 | `--seed N` | RNG seed — same seed, same network |
+| `--suffix STR` | Output filename suffix (default `_dfn` → `ini_xyr_dfn.dat`); empty string requires `--in-place` |
+| `--in-place` | Overwrite the source file (legacy behavior; off by default) |
 | `--dry-run` | Parse and generate only; write nothing, render nothing |
 | `--version` | Print the version and exit |
 

@@ -44,8 +44,9 @@ git clone https://github.com/Phoenix0531-sudo/ZDEM_DFN.git
 cd ZDEM_DFN
 pip install .
 
-# Batch-process folders (each containing a ZDEM particle file ini_xyr.dat),
-# rewriting them in place and dropping a preview image:
+# Batch-process folders (each containing a ZDEM particle file ini_xyr.dat).
+# Non-destructive by default: tagged particles go to ini_xyr_dfn.dat,
+# the source file is left untouched, plus a preview image is rendered:
 python -m zdem_dfn --dirs path/to/spec1 path/to/spec2 --seed 42
 
 # Or point the defaults at your folders in zdem_dfn/config.py
@@ -59,9 +60,10 @@ pytest tests/
 ```
 
 The engine reads each target folder's `ini_xyr.dat` (initial particle
-positions), generates the fracture network, rewrites the file in place,
-and saves `dfn_preview.png` (or `--out PATH`) with tagged particles. Default
-`TARGET_DIRECTORIES` point at the author's local specimen folders —
+positions), generates the fracture network, writes tagged particles to
+`ini_xyr_dfn.dat` next to the source (which is never modified unless
+`--in-place` is passed), and saves `dfn_preview.png` (or `--out PATH`).
+Default `TARGET_DIRECTORIES` point at the author's local specimen folders —
 override them with `--dirs` or edit `zdem_dfn/config.py`.
 
 ### CLI reference
@@ -71,6 +73,8 @@ override them with `--dirs` or edit `zdem_dfn/config.py`.
 | `--dirs DIR [DIR …]` | Target folders, each containing an `ini_xyr.dat` (default: `config.TARGET_DIRECTORIES`) |
 | `--out PATH` | Preview image output path (default `dfn_preview.png` in the current directory) |
 | `--seed N` | RNG seed — same seed, same network |
+| `--suffix STR` | Output filename suffix (default `_dfn` → `ini_xyr_dfn.dat`); empty string requires `--in-place` |
+| `--in-place` | Overwrite the source file (legacy behavior; off by default) |
 | `--dry-run` | Parse and generate only; write nothing, render nothing |
 | `--version` | Print the version and exit |
 

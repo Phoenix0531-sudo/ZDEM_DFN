@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+### Changed
+- **Non-destructive output by default**: tagged particles are now written to `<stem><suffix><ext>` (`ini_xyr_dfn.dat` by default, configurable via `--suffix`) next to the source file; the source `ini_xyr.dat` is never modified unless `--in-place` is passed. An empty `--suffix` without `--in-place` is rejected (exit 2). This closes the last Tier-1 review blocker.
+- Professional plain-language progress output (`[1/4]`–`[4/4]`, `[skip]`/`[missing]` markers) replaces the flowery engine banners (e.g. “地壳破碎再造引擎”)
+- Removed leftover `typing.cast` workarounds from the module split
+
 ## [1.1.1] - 2026-09-12
 
 ### Added
