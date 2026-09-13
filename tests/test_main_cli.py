@@ -139,6 +139,33 @@ def test_main_cli_stats_flag(tmp_path):
     assert "p21_actual" in text and "dip_bin_deg" in text
 
 
+def test_main_cli_rose_flag(tmp_path):
+    """CLI --rose 生成玫瑰图 PNG（含深红柱体）。"""
+    from PIL import Image
+
+    _make_specimen(tmp_path)
+    rose = tmp_path / "rose.png"
+    rc = main(["--dirs", str(tmp_path), "--seed", "7",
+               "--out", str(tmp_path / "out.png"),
+               "--rose", str(rose)])
+    assert rc == 0
+    assert rose.exists()
+    im = Image.open(str(rose)).convert("RGB")
+    colors = im.getcolors(maxcolors=10_000_000)
+    dark_red = sum(c for c, (r, g, b) in colors if r > 90 and g < 70 and b < 70)
+    assert dark_red > 500, dark_red
+
+
+def test_main_cli_rose_with_dry_run(tmp_path):
+    """--dry-run 下 --rose 仍产出分析图（不写模型文件）。"""
+    _make_specimen(tmp_path)
+    rc = main(["--dirs", str(tmp_path), "--seed", "7",
+               "--dry-run", "--rose", str(tmp_path / "rose.png")])
+    assert rc == 0
+    assert (tmp_path / "rose.png").exists()
+    assert not (tmp_path / "ini_xyr_dfn.dat").exists()  # 不写模型输出
+
+
 def test_main_cli_dispatch(tmp_path):
     """python -m zdem_dfn 等价的 main() 调度路径。"""
     _make_specimen(tmp_path)

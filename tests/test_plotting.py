@@ -4,7 +4,8 @@ import matplotlib
 matplotlib.use("Agg")
 
 from zdem_dfn import config
-from zdem_dfn.plotting import generate_preview_plot
+from zdem_dfn.plotting import generate_preview_plot, plot_rose_diagram
+from zdem_dfn.stats import compute_dip_bins
 
 
 def _particles(n=6, seed=3):
@@ -67,3 +68,44 @@ def test_default_window_ticks_match_default_crop(tmp_path, monkeypatch):
     assert yt[0] == config.CROP_MIN_Y and yt[-1] == config.CROP_MAX_Y
     assert len(xt) == 5  # 4 等分
     assert len(yt) == 9  # 8 等分
+
+
+def test_rose_diagram_writes_png(tmp_path):
+    """玫瑰图：两批正交裂隙（45°/135°），PNG 非空白且含深红柱。"""
+    from PIL import Image
+
+    # 45° 与 135° 各 4 条，同长度
+    fractures = [((0.0, 0.0), (10.0, 10.0))] * 4 + [((0.0, 10.0), (10.0, 0.0))] * 4
+    out = str(tmp_path / "rose.png")
+    plot_rose_diagram(fractures, out, bin_size=10.0)
+
+    im = Image.open(out).convert("RGB")
+    assert im.size[0] > 100 and im.size[1] > 100
+    colors = im.getcolors(maxcolors=10_000_000)
+    dark_red = sum(c for c, (r, g, b) in colors if r > 90 and g < 70 and b < 70)
+    white = sum(c for c, (r, g, b) in colors if r > 240 and g > 240 and b > 240)
+    assert dark_red > 1000, dark_red   # 有柱体
+    assert white > 1000                # 有留白
+
+
+def test_rose_diagram_bins_match_stats(tmp_path):
+    """玫瑰图扇区与统计报告分箱一致：45/135 各占一半。"""
+    fractures = [((0.0, 0.0), (10.0, 10.0))] * 4 + [((0.0, 10.0), (10.0, 0.0))] * 4
+    monkeyfig_path = str(tmp_path / "r2.png")
+
+    import matplotlib.pyplot as _plt
+    orig_close = _plt.close
+    _plt.close = lambda *a, **k: None
+    try:
+        plot_rose_diagram(fractures, monkeyfig_path, bin_size=10.0)
+        fig = _plt.gcf()
+        ax = fig.axes[0]
+        # 柱高总和 = 裂隙条数，两主峰各占 4
+        heights = [b.get_height() for b in ax.patches]
+        assert sum(heights) == 8
+        assert max(heights) == 4
+        bins = compute_dip_bins([45.0, 135.0] * 4)
+        assert sum(bins) == 8 and max(bins) == 4
+    finally:
+        _plt.close = orig_close
+        orig_close("all")
