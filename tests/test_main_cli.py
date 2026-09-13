@@ -68,13 +68,19 @@ def test_run_batch_dry_run_writes_nothing(tmp_path, capsys):
 
 
 def test_run_batch_end_to_end(tmp_path):
-    """全管线：覆写文件、tab 标签后缀、预览图落地。"""
+    """全管线：非破坏性写 ini_xyr_dfn.dat、源文件不动、tab 标签后缀、预览图落地。"""
     p = _make_specimen(tmp_path)
+    src_before = p.read_text(encoding="utf-8")
     out = tmp_path / "render.png"
     rc = run_batch(directories=[str(tmp_path)], seed=42, out_image=str(out))
     assert rc == 0
 
-    text = p.read_text(encoding="utf-8").splitlines()
+    # 源文件保持不动
+    assert p.read_text(encoding="utf-8") == src_before
+
+    tagged_file = tmp_path / "ini_xyr_dfn.dat"
+    assert tagged_file.exists(), "默认应写 <stem>_dfn<ext>，而非覆写源文件"
+    text = tagged_file.read_text(encoding="utf-8").splitlines()
     assert text[0] == "# synthetic test specimen"
     tagged = [line for line in text if "\tDFN_" in line]
     assert tagged, "应存在被裂隙切中的颗粒"
@@ -85,7 +91,7 @@ def test_run_batch_end_to_end(tmp_path):
 
 
 def test_run_batch_seed_reproducible(tmp_path):
-    """同 seed 两次运行 → 覆写文件逐字节一致。"""
+    """同 seed 两次运行 → 输出文件逐字节一致。"""
     a = tmp_path / "a"
     b = tmp_path / "b"
     a.mkdir()
@@ -94,7 +100,7 @@ def test_run_batch_seed_reproducible(tmp_path):
     _make_specimen(b)
     run_batch(directories=[str(a)], seed=123, out_image=str(tmp_path / "a.png"))
     run_batch(directories=[str(b)], seed=123, out_image=str(tmp_path / "b.png"))
-    assert a.joinpath("ini_xyr.dat").read_bytes() == b.joinpath("ini_xyr.dat").read_bytes()
+    assert a.joinpath("ini_xyr_dfn.dat").read_bytes() == b.joinpath("ini_xyr_dfn.dat").read_bytes()
 
 
 def test_run_batch_skips_missing_subfolder(tmp_path, capsys):
@@ -106,7 +112,7 @@ def test_run_batch_skips_missing_subfolder(tmp_path, capsys):
                    seed=42, out_image=str(tmp_path / "out.png"))
     assert rc == 0
     captured = capsys.readouterr().out
-    assert "找不到指定的围压容器文件夹" in captured
+    assert "目录不存在" in captured
     assert (tmp_path / "out.png").exists()
 
 
@@ -117,3 +123,55 @@ def test_main_cli_dispatch(tmp_path):
                "--out", str(tmp_path / "cli.png")])
     assert rc == 0
     assert (tmp_path / "cli.png").exists()
+
+
+def test_run_batch_in_place_overwrites(tmp_path):
+    """--in-place：恢复旧版覆写语义，不产生 _dfn 文件。"""
+    p = _make_specimen(tmp_path)
+    src_before = p.read_text(encoding="utf-8")
+    rc = run_batch(directories=[str(tmp_path)], seed=42,
+                   out_image=str(tmp_path / "x.png"), in_place=True)
+    assert rc == 0
+    assert p.read_text(encoding="utf-8") != src_before, "源文件应被覆写"
+    assert "\tDFN_" in p.read_text(encoding="utf-8")
+    assert not (tmp_path / "ini_xyr_dfn.dat").exists()
+
+
+def test_run_batch_custom_suffix(tmp_path):
+    """--suffix 自定义：写 ini_xyr.tagged.dat。"""
+    _make_specimen(tmp_path)
+    rc = run_batch(directories=[str(tmp_path)], seed=42,
+                   out_image=str(tmp_path / "x.png"), suffix=".tagged")
+    assert rc == 0
+    assert (tmp_path / "ini_xyr.tagged.dat").exists()
+    assert (tmp_path / "ini_xyr.dat").exists()
+
+
+def test_main_empty_suffix_without_in_place_refused(tmp_path, capsys):
+    """--suffix '' 且未传 --in-place → argparse error（exit 2），不碰任何文件。"""
+    _make_specimen(tmp_path)
+    src_before = (tmp_path / "ini_xyr.dat").read_text(encoding="utf-8")
+    with pytest.raises(SystemExit) as exc_info:
+        main(["--dirs", str(tmp_path), "--suffix", ""])
+    assert exc_info.value.code == 2
+    assert (tmp_path / "ini_xyr.dat").read_text(encoding="utf-8") == src_before
+
+
+def test_main_in_place_empty_suffix_allowed(tmp_path):
+    """--in-place --suffix ''：显式覆写语义，合法。"""
+    _make_specimen(tmp_path)
+    rc = main(["--dirs", str(tmp_path), "--in-place", "--suffix", "",
+               "--seed", "42", "--out", str(tmp_path / "y.png")])
+    assert rc == 0
+    assert "\tDFN_" in (tmp_path / "ini_xyr.dat").read_text(encoding="utf-8")
+
+
+def test_dry_run_leaves_source_untouched_any_mode(tmp_path):
+    """dry-run：两种模式下源文件都分毫不动，且无输出文件产生。"""
+    p = _make_specimen(tmp_path)
+    src_before = p.read_text(encoding="utf-8")
+    assert run_batch(directories=[str(tmp_path)], seed=1, dry_run=True) == 0
+    assert run_batch(directories=[str(tmp_path)], seed=1, dry_run=True,
+                     in_place=True) == 0
+    assert p.read_text(encoding="utf-8") == src_before
+    assert not (tmp_path / "ini_xyr_dfn.dat").exists()
