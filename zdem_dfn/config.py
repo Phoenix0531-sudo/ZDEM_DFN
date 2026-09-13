@@ -20,6 +20,8 @@ ENABLE_HETEROGENEOUS = False
 ENABLE_NODE_PENALTY = False
 
 SOURCE_FILENAME = "ini_xyr.dat"
+# 弃用：v1.2 起输出路径由 --suffix 派生（<stem><suffix><ext>）。
+# 仅当旧代码显式启用就地覆写语义时此常量才有意义；保留是为 facade 兼容。
 TARGET_FILENAME = "ini_xyr.dat"
 
 TARGET_DIRECTORIES = [
