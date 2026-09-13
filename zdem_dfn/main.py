@@ -37,7 +37,8 @@ def run_batch(directories: list[str] | None = None,
               dry_run: bool = False,
               suffix: str = DEFAULT_SUFFIX,
               in_place: bool = False,
-              stats_path: str | None = None) -> int:
+              stats_path: str | None = None,
+              rose_path: str | None = None) -> int:
     """批处理编排。
 
     - directories: None 时读 config.TARGET_DIRECTORIES（支持运行时覆盖）。
@@ -47,6 +48,7 @@ def run_batch(directories: list[str] | None = None,
     - suffix:      输出文件名后缀；in_place=True 时忽略。
     - in_place:    True 时覆写源文件（旧版行为），False 时写 <stem><suffix><ext>。
     - stats_path:  非空时写网络统计报告（.csv → CSV，其余 Markdown）。
+    - rose_path:   非空时写极坐标玫瑰图 PNG。
 
     返回退出码（0 成功；1 配置错误；2 全部目录缺失）。
     """
@@ -104,6 +106,10 @@ def run_batch(directories: list[str] | None = None,
         write_stats_report(net_stats, stats_path)
         print(f"    统计报告已写入：{stats_path}")
 
+    if rose_path:
+        from zdem_dfn.plotting import plot_rose_diagram
+        plot_rose_diagram(fractures, rose_path)
+
     print("\n[3/4] 批处理目标目录 ...")
     grid_cell_size: float = avg_diameter * float(config.FRACTURE_SETS[0]["length_mult"]) * 1.5
     last_lines_data = None
@@ -136,9 +142,9 @@ def run_batch(directories: list[str] | None = None,
         else:
             output_tagged_coordinates(curr_output_path, lines_data)
             last_lines_data = lines_data
-
     if dry_run:
-        print("\n[收尾] dry-run 完成，未写任何文件。")
+        print("\n[收尾] dry-run 完成：未写颗粒文件、未渲染预览图。"
+              "（--stats/--rose 等分析输出若指定仍会写出）")
         return 0
 
     print("\n[4/4] 渲染预览图 ...")
@@ -175,6 +181,8 @@ def build_arg_parser() -> argparse.ArgumentParser:
     p.add_argument("--stats", default=None, metavar="PATH",
                    help="写网络统计报告（p21 实际/目标、方向角分布、迹长分布；"
                         ".csv 后缀写 CSV，其余写 Markdown）")
+    p.add_argument("--rose", default=None, metavar="PATH",
+                   help="写极坐标玫瑰图（裂隙走向分布，PNG）")
     p.add_argument("--version", action="store_true",
                    help="打印版本号后退出")
     return p
@@ -203,6 +211,7 @@ def main(argv: list[str] | None = None) -> int:
         suffix=args.suffix,
         in_place=args.in_place,
         stats_path=args.stats,
+        rose_path=args.rose,
     )
 
 

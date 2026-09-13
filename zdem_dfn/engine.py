@@ -67,7 +67,7 @@ from zdem_dfn.io import (  # noqa: F401
     parse_particle_file,
 )
 from zdem_dfn.main import main, run_batch  # noqa: F401
-from zdem_dfn.plotting import generate_preview_plot  # noqa: F401
+from zdem_dfn.plotting import generate_preview_plot, plot_rose_diagram  # noqa: F401
 from zdem_dfn.sampling import (  # noqa: F401
     check_particles_overlap,
     process_single_folder_lines,

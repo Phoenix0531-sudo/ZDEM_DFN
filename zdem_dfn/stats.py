@@ -28,6 +28,18 @@ def _segment_length_and_dip(seg: Segment) -> tuple[float, float]:
     return length, dip
 
 
+def compute_dip_bins(dips: Sequence[float],
+                      bin_size: float = DIP_BIN_DEG,
+                      max_deg: float = 180.0) -> list[int]:
+    """方向角直方图分箱。返回长度 round(max_deg/bin_size) 的计数列表。"""
+    n_bins = max(1, int(round(max_deg / bin_size)))
+    bins = [0] * n_bins
+    for dip in dips:
+        idx = min(int(dip // bin_size), n_bins - 1)
+        bins[idx] += 1
+    return bins
+
+
 def compute_network_stats(fractures: Sequence[Segment],
                           min_x: float, max_x: float,
                           min_y: float, max_y: float) -> dict[str, Any]:
@@ -53,11 +65,7 @@ def compute_network_stats(fractures: Sequence[Segment],
     for fset in config.FRACTURE_SETS:
         p21_target += float(fset.get("p21", 0.0))
 
-    n_bins = int(round(180.0 / DIP_BIN_DEG))
-    dip_bins = [0] * n_bins
-    for dip in dips:
-        idx = min(int(dip // DIP_BIN_DEG), n_bins - 1)
-        dip_bins[idx] += 1
+    dip_bins = compute_dip_bins(dips)
 
     if lengths:
         lo, hi = min(lengths), max(lengths)

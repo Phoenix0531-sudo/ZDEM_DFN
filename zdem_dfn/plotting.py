@@ -109,3 +109,47 @@ def generate_preview_plot(lines_data: list[dict[str, ParticleValue]],
     plt.savefig(out_img, dpi=300, bbox_inches='tight')
     plt.close(fig)
     print(f"    - 高品质演示汇报图像已落地：{out_img}")
+
+
+def plot_rose_diagram(fractures: list[tuple[tuple[float, float], tuple[float, float]]],
+                      out_path: str,
+                      bin_size: float = 10.0):
+    """极坐标玫瑰图：裂隙走向分布（0–180，10° 分箱）。
+
+    延续预览图配色（裂隙深红 #8B0000）；半圆投影，扇区居中对齐分箱区间。
+    """
+    import math
+
+    # 延迟导入：与 generate_preview_plot 保持一致，CLI --help 不拉起 matplotlib
+    import matplotlib.pyplot as plt
+    import numpy as np
+
+    from zdem_dfn.stats import compute_dip_bins
+
+    dips: list[float] = []
+    for (x1, y1), (x2, y2) in fractures:
+        dip = math.degrees(math.atan2(y2 - y1, x2 - x1)) % 180.0
+        dips.append(dip)
+
+    bins = compute_dip_bins(dips, bin_size=bin_size)
+    n = len(bins)
+    width = math.radians(bin_size)
+    # 每个扇区中心对准区间中点：theta = bin_start + width/2
+    theta = np.arange(n) * width + width / 2.0
+
+    fig = plt.figure(figsize=(6, 4), dpi=300)
+    ax = fig.add_subplot(111, projection="polar")
+    # polar 轴专属方法，type stubs 标注为普通 Axes
+    ax.set_theta_zero_location("E")  # type: ignore[attr-defined]
+    ax.set_theta_direction(1)  # type: ignore[attr-defined]
+    ax.set_thetamin(0)  # type: ignore[attr-defined]
+    ax.set_thetamax(180)  # type: ignore[attr-defined]
+    ax.bar(theta, bins, width=width, bottom=0.0, color="#8B0000", alpha=0.85,
+          edgecolor="white", linewidth=0.5, zorder=3)
+    ax.set_thetagrids(np.arange(0, 181, 30))  # type: ignore[attr-defined]
+    ax.set_xlabel("Fracture strike (deg)", fontsize=11)
+    ax.grid(True, alpha=0.3)
+    fig.tight_layout()
+    plt.savefig(out_path, dpi=300, bbox_inches="tight")
+    plt.close(fig)
+    print(f"    - 玫瑰图已落地：{out_path}")
