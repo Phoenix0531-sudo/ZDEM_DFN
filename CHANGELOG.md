@@ -9,7 +9,7 @@ All notable changes to this project will be documented in this file.
 - Coverage pipeline: pytest-cov job in CI (96% line coverage), XML artifact upload and a self-hosted shields badge on the `badges` branch
 - Parameter gallery: `python examples/gallery.py` renders the same synthetic specimen under four `config.FRACTURE_SETS` configurations (embedded in both READMEs)
 - Community health files: `CITATION.cff` (GitHub "Cite this repository"), `CONTRIBUTING.md`, `SECURITY.md`, issue templates (bug/feature), PR template
-- PyPI publish workflow (`publish.yml`) building sdist + wheel on release tags via trusted publishing
+- Release workflow (`publish.yml`): builds sdist + wheel with `uv build` and attaches them to the GitHub Release on every version tag
 
 ### Changed
 - `pyproject.toml` is now the single source of truth: real description, license/readme metadata, `zdem-dfn` console script, unified dev deps (pytest, pytest-cov, ruff); `setup.py` and `requirements.txt` removed

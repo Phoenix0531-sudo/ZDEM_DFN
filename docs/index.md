@@ -9,9 +9,9 @@ hash-grid-accelerated particle–fracture tagging, and preview rendering.
 ## Install
 
 ```bash
-pip install zdem-dfn        # from PyPI (after the first tagged release)
-# or from source:
 pip install git+https://github.com/Phoenix0531-sudo/ZDEM_DFN.git
+# or clone and install from source:
+#   git clone https://github.com/Phoenix0531-sudo/ZDEM_DFN && pip install .
 ```
 
 ## Quick start

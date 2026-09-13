@@ -20,30 +20,9 @@ jobs:
       - name: Build sdist and wheel
         run: uv build
 
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: dist
-          path: dist/
-
       - name: Upload artifacts to the GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           files: |
             dist/*.tar.gz
             dist/*.whl
-
-  publish-pypi:
-    needs: build
-    runs-on: ubuntu-latest
-    permissions:
-      id-token: write  # OIDC for PyPI Trusted Publishing
-    environment: pypi
-    steps:
-      - uses: actions/download-artifact@v4
-        with:
-          name: dist
-          path: dist
-
-      - name: Publish to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
