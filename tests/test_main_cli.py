@@ -173,13 +173,14 @@ def test_main_cli_rose_flag(tmp_path):
     assert dark_red > 500, dark_red
 
 
-def test_main_cli_rose_with_dry_run(tmp_path):
-    """--dry-run 下 --rose 仍产出分析图（不写模型文件）。"""
+def test_main_cli_rose_with_dry_run(tmp_path, capsys):
+    """--dry-run 下 --rose 只检查并显示计划，不写任何图片或模型文件。"""
     _make_specimen(tmp_path)
     rc = main(["--dirs", str(tmp_path), "--seed", "7",
                "--dry-run", "--rose", str(tmp_path / "rose.png")])
     assert rc == 0
-    assert (tmp_path / "rose.png").exists()
+    assert "玫瑰图计划路径" in capsys.readouterr().out
+    assert not (tmp_path / "rose.png").exists()
     assert not (tmp_path / "ini_xyr_dfn.dat").exists()  # 不写模型输出
 
 
