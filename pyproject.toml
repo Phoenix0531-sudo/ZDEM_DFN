@@ -14,7 +14,7 @@ dependencies = [
 zdem-dfn = "zdem_dfn.main:main"
 
 [project.optional-dependencies]
-dev = ["pytest>=9.1.1", "pytest-cov>=6.0", "ruff>=0.6"]
+dev = ["pytest>=9.1.1", "pytest-cov>=6.0", "ruff>=0.6", "hypothesis>=6.100", "pyright>=1.1.400"]
 
 [build-system]
 requires = ["setuptools>=61"]
@@ -39,4 +39,6 @@ dev = [
     "pytest>=9.1.1",
     "pytest-cov>=6.0",
     "ruff>=0.6",
+    "hypothesis>=6.100",
+    "pyright>=1.1.400",
 ]
