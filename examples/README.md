@@ -15,8 +15,8 @@ What it does:
 1. writes a jittered, staggered particle assembly as `ini_xyr.dat`
    (`x y r` rows in scientific notation — the exact format the engine
    parses), spanning the engine's CROP window;
-2. runs the real CLI (`python -m zdem_dfn --dirs … --out … --seed …`)
-   over it with a fixed seed (20240613), producing `dfn_preview.png`;
+2. runs the real CLI over it with a fixed seed (20240613), producing
+   `dfn_preview.png` and a tagged output file in the temporary output folder;
 3. palette-optimizes the PNG for docs embedding (deterministic, ~0.5 MB).
 
 Re-running with the same package version reproduces the committed image

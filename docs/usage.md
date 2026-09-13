@@ -3,6 +3,10 @@
 ## CLI
 
 ```
+python -m zdem_dfn --input DIR --output DIR [--seed SEED]
+                   [--dry-run] [--verbose] [--stats PATH] [--rose PATH]
+
+# compatibility batch interface:
 python -m zdem_dfn [--dirs DIR [DIR ...]] [--out PATH] [--seed SEED]
                    [--suffix STR] [--in-place] [--dry-run] [--stats PATH] [--rose PATH] [--version]
 ```
@@ -15,19 +19,26 @@ because it would silently overwrite the source.
 
 | Flag | Meaning |
 |---|---|
-| `--dirs DIR [DIR …]` | Target folders, each containing an `ini_xyr.dat` (default: `config.TARGET_DIRECTORIES`) |
-| `--out PATH` | Preview image output path (default `dfn_preview.png` in the current directory) |
+| `--input DIR` | Recommended single-case input folder containing `ini_xyr.dat`; use with `--output` |
+| `--output DIR` | Recommended output folder; created automatically and receives all artifacts |
+| `--dirs DIR [DIR …]` | Compatibility batch interface for one or more folders |
+| `--out PATH` | Compatibility preview image output path |
 | `--seed N` | RNG seed — same seed, same network |
 | `--suffix STR` | Output filename suffix (default `_dfn` → `ini_xyr_dfn.dat`); empty string requires `--in-place` |
 | `--in-place` | Overwrite the source file (legacy behavior; off by default) |
-| `--dry-run` | Parse and generate only; write nothing, render nothing |
-| `--stats PATH` | Write a network statistics report: actual-vs-target p21 (total trace length / area vs `sum(FRACTURE_SETS[].p21)`), a dip histogram binned every 10°, a 10-bin trace-length histogram, and optionally particle tag counts. `.csv` suffix → CSV, otherwise Markdown. Works with `--dry-run` |
-| `--rose PATH` | Write a polar rose diagram (PNG) of fracture strike, 0–180° in 10° bins, dark-red bars matching the preview palette. Works with `--dry-run` |
+| `--dry-run` | Validate and print the plan; write no files or images |
+| `--stats PATH` | Write a network statistics report (`.csv` → CSV, otherwise Markdown); skipped during `--dry-run` |
+| `--rose PATH` | Write a polar rose diagram (PNG) of fracture strike; skipped during `--dry-run` |
 | `--version` | Print the version and exit |
 
 Exit codes: `0` success, `1` configuration error (no directories / missing
 reference file / no valid particles), `2` invalid argument combination (empty
 `--suffix` without `--in-place`).
+
+## Input and output format
+
+See [Data format](data-format.md) for the supported `ini_xyr.dat` records,
+units, directory layout, output files and synthetic-demo disclaimer.
 
 ## Fracture-set configuration
 

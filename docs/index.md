@@ -17,12 +17,16 @@ pip install git+https://github.com/Phoenix0531-sudo/ZDEM_DFN.git
 ## Quick start
 
 ```bash
-# batch-process specimen folders (each containing ini_xyr.dat):
-python -m zdem_dfn --dirs path/to/spec1 path/to/spec2 --seed 42
+# bundled synthetic demo (not laboratory data):
+python -m zdem_dfn --input examples/demo_case --output outputs/demo_case --seed 42
 
-# inspect without writing anything:
-python -m zdem_dfn --dirs path/to/spec1 --dry-run
+# inspect without creating output:
+python -m zdem_dfn --input examples/demo_case --output outputs/demo_case --dry-run
 ```
+
+The output directory contains `ini_xyr_dfn.dat` and `dfn_preview.png`; the
+source file is preserved. See [Usage](usage.md) and [Data format](data-format.md)
+for the compatibility batch interface and input details.
 
 All images on this site are generated from **synthetic demo data** —
 never laboratory measurements.
@@ -30,4 +34,5 @@ never laboratory measurements.
 ## Start here
 
 - [Usage](usage.md) — CLI reference, fracture-set configuration, examples.
+- [Data format](data-format.md) — `ini_xyr.dat` fields, units and output layout.
 - [Code reference](reference/zdem_dfn/config.md) — auto-generated API docs.
