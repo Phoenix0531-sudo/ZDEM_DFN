@@ -189,6 +189,14 @@ def build_arg_parser() -> argparse.ArgumentParser:
 
 
 def main(argv: list[str] | None = None) -> int:
+    # Windows 控制台默认 cp1252/gbk，中文进度输出会 UnicodeEncodeError
+    for stream in (sys.stdout, sys.stderr):
+        try:
+            if stream.encoding and stream.encoding.lower() not in ("utf-8", "utf8"):
+                stream.reconfigure(encoding="utf-8", errors="replace")  # type: ignore[attr-defined]
+        except (AttributeError, OSError, ValueError):
+            pass
+
     parser = build_arg_parser()
     args = parser.parse_args(argv)
 

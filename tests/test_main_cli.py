@@ -1,4 +1,5 @@
 """CLI 与批处理编排测试：退出码、dry-run、端到端管线、种子复现。"""
+import os
 import random
 
 import pytest
@@ -17,7 +18,7 @@ def test_dunder_main_module_entry(tmp_path, monkeypatch):
     proc = subprocess.run(
         [sys.executable, "-m", "zdem_dfn", "--dirs", str(tmp_path),
          "--seed", "7", "--out", str(tmp_path / "m.png")],
-        capture_output=True, text=True, timeout=120,
+        capture_output=True, text=True, timeout=120, encoding="utf-8",
     )
     assert proc.returncode == 0, proc.stderr
     assert (tmp_path / "m.png").exists()
@@ -180,6 +181,22 @@ def test_main_cli_rose_with_dry_run(tmp_path):
     assert rc == 0
     assert (tmp_path / "rose.png").exists()
     assert not (tmp_path / "ini_xyr_dfn.dat").exists()  # 不写模型输出
+
+
+def test_main_cli_windows_legacy_console(monkeypatch, tmp_path):
+    """回归：cp1252 控制台下中文进度输出不得 UnicodeEncodeError（gh CI 真实翻车）。"""
+    import subprocess
+    import sys
+
+    _make_specimen(tmp_path)
+    env = {**os.environ, "PYTHONIOENCODING": "cp1252"}
+    proc = subprocess.run(
+        [sys.executable, "-m", "zdem_dfn", "--dirs", str(tmp_path),
+         "--seed", "7", "--out", str(tmp_path / "m.png"), "--dry-run"],
+        capture_output=True, text=True, timeout=120, encoding="utf-8",
+        errors="replace", env=env,
+    )
+    assert proc.returncode == 0, proc.stderr
 
 
 def test_main_cli_dispatch(tmp_path):
