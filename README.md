@@ -77,6 +77,7 @@ override them with `--dirs` or edit `zdem_dfn/config.py`.
 | `--in-place` | Overwrite the source file (legacy behavior; off by default) |
 | `--dry-run` | Parse and generate only; write nothing, render nothing |
 | `--stats PATH` | Write a network statistics report (actual-vs-target p21, dip histogram, trace-length histogram; `.csv` suffix → CSV, otherwise Markdown) |
+| `--rose PATH` | Write a polar rose diagram of fracture strike (PNG, 0–180°, 10° bins) |
 | `--version` | Print the version and exit |
 
 ### Configuring fracture sets

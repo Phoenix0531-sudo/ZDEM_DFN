@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+### Added
+- **Rose diagrams** (`--rose PATH`): polar histogram of fracture strike (0–180°, 10° bins), dark-red bars matching the preview palette; works with `--dry-run`. Dip binning is shared with `--stats` via `compute_dip_bins`, so diagram and report always agree
+
 ## [1.2.0] - 2026-09-13
 
 ### Added
