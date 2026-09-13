@@ -4,13 +4,17 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+- Recommended `--input DIR --output DIR` single-case workflow for new users, with output-directory isolation and actionable CLI examples
+- `docs/data-format.md` documenting the supported `ini_xyr.dat` records, units, directory layout, output semantics and synthetic demo disclaimer
+- End-to-end subprocess tests covering help, demo processing, source protection, dry-run, friendly errors and flag conflicts
+- **Rose diagrams** (`--rose PATH`): polar histogram of fracture strike (0–180°, 10° bins), dark-red bars matching the preview palette; dip binning is shared with `--stats` via `compute_dip_bins`, so diagram and report always agree
+
 ### Fixed
 - Professional plain-language output extended to `plotting.py` (preview/rose diagram progress messages)
 - Corrected exit-code documentation in `docs/usage.md` and `run_batch` docstring: `2` is the invalid flag combination (empty `--suffix` without `--in-place`), not "every directory missing"
 - Reconfigured non-UTF-8 stdout/stderr streams to UTF-8 with replacement on CLI startup, preventing `UnicodeEncodeError` on legacy Windows consoles
-
-### Added
-- **Rose diagrams** (`--rose PATH`): polar histogram of fracture strike (0–180°, 10° bins), dark-red bars matching the preview palette; works with `--dry-run`. Dip binning is shared with `--stats` via `compute_dip_bins`, so diagram and report always agree
+- Dry-run now consistently skips all artifact writes, including stats and rose-diagram outputs
 
 ## [1.2.0] - 2026-09-13
 

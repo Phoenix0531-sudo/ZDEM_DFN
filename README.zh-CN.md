@@ -1,6 +1,6 @@
 # ZDEM DFN
 
-**面向 ZDEM 工作流的离散裂隙网络（DFN）生成。**
+**ZDEM DFN 是面向岩石力学研究者的命令行工具：读取 ZDEM `ini_xyr.dat` 颗粒文件，生成可复现的多组系 DFN，并输出带标签颗粒文件、预览图和统计报告。**
 
 [English](README.md) | [中文](README.zh-CN.md)
 
@@ -17,7 +17,7 @@
 - **种子可复现** — `--seed 42` 精确重放同一网络；重跑结果逐字节一致（有测试覆盖）。
 - **快速颗粒-裂隙标记** — 网格哈希先粗筛候选、再做精确距离判定，替代 O(P×F) 暴力求交（10 000 颗粒 × 400 段约 **快 11 倍**）；与暴力法等价有测试。
 - **机制开关** — 非均质响应（asperity / matrix / gouge 概率）与节点罚函数，全部集中在 `zdem_dfn/config.py`。
-- **安全检查** — `--dry-run` 只解析与生成网络，不写入颗粒文件或预览图；仍可按需输出 `--stats`/`--rose` 分析报告。
+- **安全检查** — `--dry-run` 校验输入并打印处理计划，不写入颗粒文件、报告或图片。
 - **预览渲染** — 带标记颗粒图 + 裂隙迹线，高分辨率 PNG。
 
 ## 预览
@@ -38,38 +38,40 @@
 ```bash
 pip install .
 
-# 批处理各文件夹（每个含 ZDEM 颗粒文件 ini_xyr.dat）。
-# 默认非破坏性：带标签颗粒写入 ini_xyr_dfn.dat，源文件保持不动，并输出预览图：
+# 快速开始：仓库自带合成演示数据（不代表真实实验结果）
+python -m zdem_dfn --input examples/demo_case --output outputs/demo_case --seed 42
+# outputs/demo_case/ 中会生成 ini_xyr_dfn.dat 和 dfn_preview.png
+
+# 只检查、不创建任何输出：
+python -m zdem_dfn --input examples/demo_case --output outputs/demo_case --dry-run
+
+# 多工况批处理仍可使用兼容接口：
 python -m zdem_dfn --dirs 路径/样品1 路径/样品2 --seed 42
-
-# 或在 zdem_dfn/config.py 里把默认值指向你的文件夹
-# （TARGET_DIRECTORIES / SOURCE_FILENAME / ENABLE_* 开关），然后：
-python -m zdem_dfn
-
-# 不写任何文件，仅校验 / 检查：
-python -m zdem_dfn --dirs 路径/样品1 --dry-run
 
 pytest tests/
 ```
 
 引擎读取各目标文件夹的 `ini_xyr.dat`（初始颗粒坐标），生成裂隙网络后
-将带标签颗粒写入源文件旁的 `ini_xyr_dfn.dat`（除非显式传 `--in-place`，
-否则源文件永不被修改），并输出带标签颗粒的 `dfn_preview.png`（或
-`--out 路径`）。默认 `TARGET_DIRECTORIES` 指向作者本机样品目录——用
-`--dirs` 覆盖，或编辑 `zdem_dfn/config.py`。
+将带标签颗粒写入 `ini_xyr_dfn.dat`。推荐的 `--input`/`--output` 模式会把
+处理文件与 `dfn_preview.png` 统一写入输出目录，源文件永不被修改。历史 `TARGET_DIRECTORIES` 默认值指向作者本机样品目录，不是推荐入口。单个工况请使用
+`--input` / `--output`，多工况请使用 `--dirs`。输入格式详见
+[data-format.md](docs/data-format.md)。
 
 ### CLI 参数
 
 | 参数 | 说明 |
 |---|---|
-| `--dirs 目录 [目录 …]` | 目标文件夹列表，各含一个 `ini_xyr.dat`（默认读 `config.TARGET_DIRECTORIES`） |
-| `--out 路径` | 预览图输出路径（默认当前目录下 `dfn_preview.png`） |
+| `--input 目录` | 推荐的单工况输入目录，内含 `ini_xyr.dat` |
+| `--output 目录` | 推荐的输出目录；写入 `ini_xyr_dfn.dat` 与 `dfn_preview.png` |
+| `--dirs 目录 [目录 …]` | 兼容的多工况批处理接口 |
+| `--out 路径` | 兼容接口的预览图输出路径（与 `--dirs` 配合） |
 | `--seed N` | 随机种子——同种子同网络 |
-| `--suffix STR` | 输出文件名后缀（默认 `_dfn` → `ini_xyr_dfn.dat`）；设为空串需配合 `--in-place` |
-| `--in-place` | 覆写源文件（旧版行为；默认关闭） |
-| `--dry-run` | 只解析与生成，不写文件、不渲染 |
-| `--stats PATH` | 写网络统计报告（p21 实际/目标对比、方向角分布、迹长分布；`.csv` 后缀写 CSV，其余写 Markdown） |
-| `--rose PATH` | 写极坐标玫瑰图（裂隙走向分布，PNG，0–180°、10° 分箱） |
+| `--suffix STR` | 兼容接口的输出文件名后缀（默认 `_dfn`） |
+| `--in-place` | 覆写源文件（旧版行为；默认关闭；不能与 `--input` 同用） |
+| `--dry-run` | 校验并打印计划；不写任何文件或图片 |
+| `--stats PATH` | 写网络统计（`.csv` 写 CSV，否则写 Markdown） |
+| `--rose PATH` | 写裂隙走向玫瑰图（PNG） |
+| `--verbose` | 打印详细输入/输出路径和跳过原因 |
 | `--version` | 打印版本号后退出 |
 
 ### 配置裂隙组系

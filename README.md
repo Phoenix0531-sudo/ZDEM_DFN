@@ -1,6 +1,6 @@
 # ZDEM DFN
 
-**Discrete Fracture Network generators for ZDEM model workflows.**
+**ZDEM DFN is a command-line tool for rock-mechanics researchers: it reads ZDEM `ini_xyr.dat` particle files, generates seeded multi-set DFNs, and writes tagged particle outputs plus preview/report artifacts.**
 
 [English](README.md) | [中文](README.zh-CN.md)
 
@@ -17,7 +17,7 @@ Build stochastic or controlled **fracture sets** and export conventions oriented
 - **Seeded reproducibility** — `--seed 42` replays the exact same network; reruns are byte-identical (covered by tests).
 - **Fast particle–fracture tagging** — a hash grid shortlists candidates before exact distance tests, replacing the O(P×F) brute-force search (**~11× faster** at 10 000 particles × 400 segments); equivalence with brute force is tested.
 - **Mechanism toggles** — heterogeneous material response (asperity / matrix / gouge probabilities) and node penalty, all centralized in `zdem_dfn/config.py`.
-- **Safe inspection** — `--dry-run` parses and generates the network without writing particle or preview files; analytical `--stats`/`--rose` reports remain available.
+- **Safe inspection** — `--dry-run` validates the input and prints the plan without writing particle files, reports or images.
 - **Preview rendering** — tagged particle map plus fracture traces as a high-resolution PNG.
 
 ## Preview
@@ -44,40 +44,44 @@ git clone https://github.com/Phoenix0531-sudo/ZDEM_DFN.git
 cd ZDEM_DFN
 pip install .
 
-# Batch-process folders (each containing a ZDEM particle file ini_xyr.dat).
-# Non-destructive by default: tagged particles go to ini_xyr_dfn.dat,
-# the source file is left untouched, plus a preview image is rendered:
+# Quick start: bundled synthetic demo (not laboratory data)
+python -m zdem_dfn --input examples/demo_case --output outputs/demo_case --seed 42
+# outputs/demo_case/ contains ini_xyr_dfn.dat and dfn_preview.png
+
+# Inspect the same case without creating any output:
+python -m zdem_dfn --input examples/demo_case --output outputs/demo_case --dry-run
+
+# Batch mode remains available for multiple conditions:
 python -m zdem_dfn --dirs path/to/spec1 path/to/spec2 --seed 42
-
-# Or point the defaults at your folders in zdem_dfn/config.py
-# (TARGET_DIRECTORIES / SOURCE_FILENAME / ENABLE_* toggles), then:
-python -m zdem_dfn
-
-# Validate / inspect without writing anything:
-python -m zdem_dfn --dirs path/to/spec1 --dry-run
 
 pytest tests/
 ```
 
 The engine reads each target folder's `ini_xyr.dat` (initial particle
-positions), generates the fracture network, writes tagged particles to
-`ini_xyr_dfn.dat` next to the source (which is never modified unless
-`--in-place` is passed), and saves `dfn_preview.png` (or `--out PATH`).
-Default `TARGET_DIRECTORIES` point at the author's local specimen folders —
-override them with `--dirs` or edit `zdem_dfn/config.py`.
+positions), generates the fracture network, and writes tagged particles to
+`ini_xyr_dfn.dat`. In the recommended `--input`/`--output` mode, both the
+processed file and `dfn_preview.png` are written under the output directory;
+the source is never modified. The historical `TARGET_DIRECTORIES` defaults
+point at the author's local specimen folders; they are not the recommended
+entry point. Use `--input` /
+`--output` for a standalone case, or `--dirs` for multiple conditions. See
+[data-format.md](docs/data-format.md) for the supported input format.
 
 ### CLI reference
 
 | Flag | Meaning |
 |---|---|
-| `--dirs DIR [DIR …]` | Target folders, each containing an `ini_xyr.dat` (default: `config.TARGET_DIRECTORIES`) |
-| `--out PATH` | Preview image output path (default `dfn_preview.png` in the current directory) |
+| `--input DIR` | Recommended single-case input folder containing `ini_xyr.dat` (requires `--output`) |
+| `--output DIR` | Required with `--input`; output folder, created automatically |
+| `--dirs DIR [DIR …]` | Compatibility batch mode for one or more input folders |
+| `--out PATH` | Compatibility preview image path (used with `--dirs`) |
 | `--seed N` | RNG seed — same seed, same network |
-| `--suffix STR` | Output filename suffix (default `_dfn` → `ini_xyr_dfn.dat`); empty string requires `--in-place` |
-| `--in-place` | Overwrite the source file (legacy behavior; off by default) |
-| `--dry-run` | Parse and generate only; write nothing, render nothing |
-| `--stats PATH` | Write a network statistics report (actual-vs-target p21, dip histogram, trace-length histogram; `.csv` suffix → CSV, otherwise Markdown) |
-| `--rose PATH` | Write a polar rose diagram of fracture strike (PNG, 0–180°, 10° bins) |
+| `--suffix STR` | Output filename suffix in compatibility mode (default `_dfn`) |
+| `--in-place` | Overwrite the source file (legacy behavior; off by default; incompatible with `--input`) |
+| `--dry-run` | Validate and print the plan; write no files or images |
+| `--stats PATH` | Write network statistics (`.csv` → CSV, otherwise Markdown) |
+| `--rose PATH` | Write a fracture-strike rose diagram (PNG) |
+| `--verbose` | Print detailed input/output paths and skip reasons |
 | `--version` | Print the version and exit |
 
 ### Configuring fracture sets
