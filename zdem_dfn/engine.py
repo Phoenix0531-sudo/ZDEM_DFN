@@ -73,3 +73,4 @@ from zdem_dfn.sampling import (  # noqa: F401
     process_single_folder_lines,
     random_tag_by_probability,
 )
+from zdem_dfn.stats import compute_network_stats, write_stats_report  # noqa: F401

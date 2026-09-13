@@ -36,7 +36,8 @@ def run_batch(directories: list[str] | None = None,
               seed: int | None = None,
               dry_run: bool = False,
               suffix: str = DEFAULT_SUFFIX,
-              in_place: bool = False) -> int:
+              in_place: bool = False,
+              stats_path: str | None = None) -> int:
     """批处理编排。
 
     - directories: None 时读 config.TARGET_DIRECTORIES（支持运行时覆盖）。
@@ -45,6 +46,7 @@ def run_batch(directories: list[str] | None = None,
     - dry_run:     只解析与生成网络，不写文件、不渲染。
     - suffix:      输出文件名后缀；in_place=True 时忽略。
     - in_place:    True 时覆写源文件（旧版行为），False 时写 <stem><suffix><ext>。
+    - stats_path:  非空时写网络统计报告（.csv → CSV，其余 Markdown）。
 
     返回退出码（0 成功；1 配置错误；2 全部目录缺失）。
     """
@@ -96,6 +98,12 @@ def run_batch(directories: list[str] | None = None,
         model_area, min_x, max_x, min_y, max_y, avg_diameter)
     print(f"    已生成 {num_fractures} 条裂隙。")
 
+    if stats_path:
+        from zdem_dfn.stats import compute_network_stats, write_stats_report
+        net_stats = compute_network_stats(fractures, min_x, max_x, min_y, max_y)
+        write_stats_report(net_stats, stats_path)
+        print(f"    统计报告已写入：{stats_path}")
+
     print("\n[3/4] 批处理目标目录 ...")
     grid_cell_size: float = avg_diameter * float(config.FRACTURE_SETS[0]["length_mult"]) * 1.5
     last_lines_data = None
@@ -145,7 +153,6 @@ def run_batch(directories: list[str] | None = None,
     print(f"批处理完成，用时 {elapsed_time:.3f} 秒")
     return 0
 
-
 def build_arg_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
         prog="zdem-dfn",
@@ -165,6 +172,9 @@ def build_arg_parser() -> argparse.ArgumentParser:
                    help="覆写源文件（旧版行为；默认写 <stem><suffix><ext>）")
     p.add_argument("--dry-run", action="store_true",
                    help="只解析与生成网络，不写文件、不渲染")
+    p.add_argument("--stats", default=None, metavar="PATH",
+                   help="写网络统计报告（p21 实际/目标、方向角分布、迹长分布；"
+                        ".csv 后缀写 CSV，其余写 Markdown）")
     p.add_argument("--version", action="store_true",
                    help="打印版本号后退出")
     return p
@@ -192,6 +202,7 @@ def main(argv: list[str] | None = None) -> int:
         dry_run=args.dry_run,
         suffix=args.suffix,
         in_place=args.in_place,
+        stats_path=args.stats,
     )
 
 

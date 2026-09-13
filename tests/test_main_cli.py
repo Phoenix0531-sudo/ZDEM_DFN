@@ -116,6 +116,29 @@ def test_run_batch_skips_missing_subfolder(tmp_path, capsys):
     assert (tmp_path / "out.png").exists()
 
 
+def test_run_batch_stats_report(tmp_path):
+    """--stats 写 Markdown 报告，含 p21 对比与分箱表。"""
+    _make_specimen(tmp_path)
+    rc = run_batch(directories=[str(tmp_path)], seed=7,
+                   out_image=str(tmp_path / "out.png"),
+                   stats_path=str(tmp_path / "stats.md"))
+    assert rc == 0
+    text = (tmp_path / "stats.md").read_text(encoding="utf-8")
+    assert "p21" in text and "方向角分布" in text and "迹长分布" in text
+    assert "达成率" in text
+
+
+def test_main_cli_stats_flag(tmp_path):
+    """CLI --stats 生效（.csv → CSV）。"""
+    _make_specimen(tmp_path)
+    rc = main(["--dirs", str(tmp_path), "--seed", "7",
+               "--out", str(tmp_path / "out.png"),
+               "--stats", str(tmp_path / "stats.csv")])
+    assert rc == 0
+    text = (tmp_path / "stats.csv").read_text(encoding="utf-8")
+    assert "p21_actual" in text and "dip_bin_deg" in text
+
+
 def test_main_cli_dispatch(tmp_path):
     """python -m zdem_dfn 等价的 main() 调度路径。"""
     _make_specimen(tmp_path)
