@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [1.2.0] - 2026-09-13
 
 ### Added
 - **Network statistics reports** (`--stats PATH`): actual-vs-target p21 (total trace length / window area vs `sum(FRACTURE_SETS[].p21)`), a dip histogram binned every 10°, a 10-bin trace-length histogram; `.csv` suffix writes CSV, anything else writes Markdown. Works with `--dry-run`
