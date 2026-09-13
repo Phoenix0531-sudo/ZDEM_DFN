@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+- **Network statistics reports** (`--stats PATH`): actual-vs-target p21 (total trace length / window area vs `sum(FRACTURE_SETS[].p21)`), a dip histogram binned every 10°, a 10-bin trace-length histogram; `.csv` suffix writes CSV, anything else writes Markdown. Works with `--dry-run`
+- **Pyright type checking** in CI (`--level error` on the package) and an OS matrix (ubuntu-latest + windows-latest) for the test job
+
 ### Changed
 - **Non-destructive output by default**: tagged particles are now written to `<stem><suffix><ext>` (`ini_xyr_dfn.dat` by default, configurable via `--suffix`) next to the source file; the source `ini_xyr.dat` is never modified unless `--in-place` is passed. An empty `--suffix` without `--in-place` is rejected (exit 2). This closes the last Tier-1 review blocker.
 - Professional plain-language progress output (`[1/4]`–`[4/4]`, `[skip]`/`[missing]` markers) replaces the flowery engine banners (e.g. “地壳破碎再造引擎”)

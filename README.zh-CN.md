@@ -68,6 +68,7 @@ pytest tests/
 | `--suffix STR` | 输出文件名后缀（默认 `_dfn` → `ini_xyr_dfn.dat`）；设为空串需配合 `--in-place` |
 | `--in-place` | 覆写源文件（旧版行为；默认关闭） |
 | `--dry-run` | 只解析与生成，不写文件、不渲染 |
+| `--stats PATH` | 写网络统计报告（p21 实际/目标对比、方向角分布、迹长分布；`.csv` 后缀写 CSV，其余写 Markdown） |
 | `--version` | 打印版本号后退出 |
 
 ### 配置裂隙组系
@@ -113,7 +114,7 @@ v1.1 起引擎拆分为职责单一的模块；`zdem_dfn/engine.py` 保留为兼
 | `io.py` | `ini_xyr.dat` 解析 + 带标签就地覆写 |
 | `sampling.py` | 颗粒-裂隙标记（网格哈希加速） |
 | `plotting.py` | 预览图渲染（matplotlib） |
-| `main.py` | 批处理编排 + CLI（`--dirs/--out/--seed/--dry-run/--version`） |
+| `main.py` | 批处理编排 + CLI（`--dirs/--out/--seed/--dry-run/--stats/--version`） |
 
 与 Model Editor（手工建模）、ParticleTracker（跑后几何）配合使用。
 

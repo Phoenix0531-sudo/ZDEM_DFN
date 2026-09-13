@@ -4,7 +4,7 @@
 
 ```
 python -m zdem_dfn [--dirs DIR [DIR ...]] [--out PATH] [--seed SEED]
-                   [--suffix STR] [--in-place] [--dry-run] [--version]
+                   [--suffix STR] [--in-place] [--dry-run] [--stats PATH] [--version]
 ```
 
 Output is **non-destructive** by default: tagged particles are written to
@@ -21,6 +21,7 @@ because it would silently overwrite the source.
 | `--suffix STR` | Output filename suffix (default `_dfn` → `ini_xyr_dfn.dat`); empty string requires `--in-place` |
 | `--in-place` | Overwrite the source file (legacy behavior; off by default) |
 | `--dry-run` | Parse and generate only; write nothing, render nothing |
+| `--stats PATH` | Write a network statistics report: actual-vs-target p21 (total trace length / area vs `sum(FRACTURE_SETS[].p21)`), a dip histogram binned every 10°, a 10-bin trace-length histogram, and optionally particle tag counts. `.csv` suffix → CSV, otherwise Markdown. Works with `--dry-run` |
 | `--version` | Print the version and exit |
 
 Exit codes: `0` success, `1` configuration error (no directories / missing

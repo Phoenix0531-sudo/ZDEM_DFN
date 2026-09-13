@@ -76,6 +76,7 @@ override them with `--dirs` or edit `zdem_dfn/config.py`.
 | `--suffix STR` | Output filename suffix (default `_dfn` → `ini_xyr_dfn.dat`); empty string requires `--in-place` |
 | `--in-place` | Overwrite the source file (legacy behavior; off by default) |
 | `--dry-run` | Parse and generate only; write nothing, render nothing |
+| `--stats PATH` | Write a network statistics report (actual-vs-target p21, dip histogram, trace-length histogram; `.csv` suffix → CSV, otherwise Markdown) |
 | `--version` | Print the version and exit |
 
 ### Configuring fracture sets
@@ -124,7 +125,7 @@ Since v1.1 the engine is split into single-responsibility modules;
 | `io.py` | `ini_xyr.dat` parsing + tagged in-place rewrite |
 | `sampling.py` | Particle–fracture tagging with hash-grid acceleration |
 | `plotting.py` | Preview rendering (matplotlib) |
-| `main.py` | Batch orchestration + CLI (`--dirs/--out/--seed/--dry-run/--version`) |
+| `main.py` | Batch orchestration + CLI (`--dirs/--out/--seed/--dry-run/--stats/--version`) |
 
 Pairs with Model Editor (manual structure) and ParticleTracker (post-run geometry).
 
