@@ -20,7 +20,7 @@ What it does:
 3. palette-optimizes the PNG for docs embedding (deterministic, ~0.5 MB).
 
 Re-running with the same package version reproduces the committed image
-byte-for-byte. The committed copy was produced with the v1.1.0 code.
+byte-for-byte. The committed copy was produced with the current v1.2.0 code.
 
 > **Disclaimer**: the specimen is synthetic demo data — it is not
 > laboratory output and implies no measured rock sample.

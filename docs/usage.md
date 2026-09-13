@@ -4,7 +4,7 @@
 
 ```
 python -m zdem_dfn [--dirs DIR [DIR ...]] [--out PATH] [--seed SEED]
-                   [--suffix STR] [--in-place] [--dry-run] [--stats PATH] [--version]
+                   [--suffix STR] [--in-place] [--dry-run] [--stats PATH] [--rose PATH] [--version]
 ```
 
 Output is **non-destructive** by default: tagged particles are written to

@@ -17,7 +17,7 @@
 - **种子可复现** — `--seed 42` 精确重放同一网络；重跑结果逐字节一致（有测试覆盖）。
 - **快速颗粒-裂隙标记** — 网格哈希先粗筛候选、再做精确距离判定，替代 O(P×F) 暴力求交（10 000 颗粒 × 400 段约 **快 11 倍**）；与暴力法等价有测试。
 - **机制开关** — 非均质响应（asperity / matrix / gouge 概率）与节点罚函数，全部集中在 `zdem_dfn/config.py`。
-- **安全检查** — `--dry-run` 只解析与生成网络，不写任何文件。
+- **安全检查** — `--dry-run` 只解析与生成网络，不写入颗粒文件或预览图；仍可按需输出 `--stats`/`--rose` 分析报告。
 - **预览渲染** — 带标记颗粒图 + 裂隙迹线，高分辨率 PNG。
 
 ## 预览
@@ -99,8 +99,9 @@ flowchart LR
     A[ini_xyr.dat<br/>x y r 颗粒行] --> B[io.py<br/>parse_particle_file]
     B --> C[dfn.py<br/>generate_dfn_network<br/>种子化组系生成]
     C --> D[sampling.py<br/>网格哈希求交<br/>颗粒标记]
-    D --> E[io.py<br/>重写 ini_xyr.dat<br/>+ 标签后缀]
+    D --> E[io.py<br/>写入 ini_xyr_dfn.dat<br/>或 --in-place]
     D --> F[plotting.py<br/>dfn_preview.png]
+    D --> G[stats.py<br/>--stats / --rose 分析报告]
 ```
 
 ### 包结构
@@ -112,10 +113,11 @@ v1.1 起引擎拆分为职责单一的模块；`zdem_dfn/engine.py` 保留为兼
 | `config.py` | 常量、开关、裂隙组系定义（运行时覆盖入口） |
 | `geometry.py` | 纯几何：点线距、Cohen–Sutherland 裁剪、求交 |
 | `dfn.py` | 随机裂隙网络生成（对数正态长度、倾向组系、截断交接） |
-| `io.py` | `ini_xyr.dat` 解析 + 带标签就地覆写 |
+| `io.py` | `ini_xyr.dat` 解析 + 带标签输出（默认 `ini_xyr_dfn.dat`） |
 | `sampling.py` | 颗粒-裂隙标记（网格哈希加速） |
-| `plotting.py` | 预览图渲染（matplotlib） |
-| `main.py` | 批处理编排 + CLI（`--dirs/--out/--seed/--dry-run/--stats/--version`） |
+| `plotting.py` | 预览图与玫瑰图渲染（matplotlib） |
+| `main.py` | 批处理编排 + CLI（`--dirs/--out/--seed/--dry-run/--stats/--rose/--version`） |
+| `stats.py` | 网络统计、方向角分箱与玫瑰图数据 |
 
 与 Model Editor（手工建模）、ParticleTracker（跑后几何）配合使用。
 
@@ -132,8 +134,8 @@ v1.1 起引擎拆分为职责单一的模块；`zdem_dfn/engine.py` 保留为兼
 
 ## 可复现性与验证
 
-- **36 项测试**（`pytest tests/`）：解析回读、种子逐字节重跑一致性、
-  网格与暴力法等价、几何语义、CLI 退出码、端到端管线。
+- **63 项测试**（`pytest tests/`）：解析回读、种子逐字节重跑一致性、
+  网格与暴力法等价、几何语义、CLI 退出码、端到端管线、统计与玫瑰图渲染。
 - **CI**：Python 3.10 / 3.13 矩阵、lint、覆盖率（见顶部徽章），外加打包任务
   （wheel 构建 → 干净 venv 安装 → 导入冒烟）。
 - README 预览图由合成数据确定性重生成——见 [examples/](examples/README.md)。
@@ -156,7 +158,7 @@ mkdocs-section-index` 后运行 `mkdocs serve`）。
   title        = {ZDEM\_DFN: Discrete Fracture Network Generator for ZDEM Discrete Element Simulations},
   author       = {Phoenix0531-sudo},
   year         = {2026},
-  version      = {1.1.0},
+  version      = {1.2.0},
   url          = {https://github.com/Phoenix0531-sudo/ZDEM_DFN},
 }
 ```

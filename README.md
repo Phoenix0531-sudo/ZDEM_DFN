@@ -17,7 +17,7 @@ Build stochastic or controlled **fracture sets** and export conventions oriented
 - **Seeded reproducibility** — `--seed 42` replays the exact same network; reruns are byte-identical (covered by tests).
 - **Fast particle–fracture tagging** — a hash grid shortlists candidates before exact distance tests, replacing the O(P×F) brute-force search (**~11× faster** at 10 000 particles × 400 segments); equivalence with brute force is tested.
 - **Mechanism toggles** — heterogeneous material response (asperity / matrix / gouge probabilities) and node penalty, all centralized in `zdem_dfn/config.py`.
-- **Safe inspection** — `--dry-run` parses and generates the network without writing a single file.
+- **Safe inspection** — `--dry-run` parses and generates the network without writing particle or preview files; analytical `--stats`/`--rose` reports remain available.
 - **Preview rendering** — tagged particle map plus fracture traces as a high-resolution PNG.
 
 ## Preview
@@ -109,8 +109,9 @@ flowchart LR
     A[ini_xyr.dat<br/>x y r particle rows] --> B[io.py<br/>parse_particle_file]
     B --> C[dfn.py<br/>generate_dfn_network<br/>seeded fracture sets]
     C --> D[sampling.py<br/>hash-grid intersection<br/>particle tagging]
-    D --> E[io.py<br/>rewrite ini_xyr.dat<br/>+ tag suffix]
+    D --> E[io.py<br/>write ini_xyr_dfn.dat<br/>or --in-place]
     D --> F[plotting.py<br/>dfn_preview.png]
+    D --> G[stats.py<br/>--stats / --rose reports]
 ```
 
 ### Package layout
@@ -123,10 +124,11 @@ Since v1.1 the engine is split into single-responsibility modules;
 | `config.py` | Constants, toggles, fracture set definitions (runtime override point) |
 | `geometry.py` | Pure geometry: point-segment distance, Cohen–Sutherland clipping, intersection |
 | `dfn.py` | Stochastic fracture network generation (log-normal lengths, dip sets, truncation) |
-| `io.py` | `ini_xyr.dat` parsing + tagged in-place rewrite |
+| `io.py` | `ini_xyr.dat` parsing + tagged output (`ini_xyr_dfn.dat` by default) |
 | `sampling.py` | Particle–fracture tagging with hash-grid acceleration |
-| `plotting.py` | Preview rendering (matplotlib) |
-| `main.py` | Batch orchestration + CLI (`--dirs/--out/--seed/--dry-run/--stats/--version`) |
+| `plotting.py` | Preview and rose-diagram rendering (matplotlib) |
+| `main.py` | Batch orchestration + CLI (`--dirs/--out/--seed/--dry-run/--stats/--rose/--version`) |
+| `stats.py` | Network statistics, dip bins and rose-diagram data |
 
 Pairs with Model Editor (manual structure) and ParticleTracker (post-run geometry).
 
@@ -144,9 +146,9 @@ Reproduce on your machine: `python examples/benchmark_sampling.py`.
 
 ## Reproducibility & verification
 
-- **36 tests** (`pytest tests/`): parse round-trip, seeded byte-identical
+- **63 tests** (`pytest tests/`): parse round-trip, seeded byte-identical
   reruns, grid-vs-brute-force equivalence, geometry semantics, CLI exit
-  codes, end-to-end pipeline.
+  codes, end-to-end pipeline, statistics and rose-diagram rendering.
 - **CI**: Python 3.10 / 3.13 matrix, lint, coverage (badge above), plus a
   packaging job (wheel build → clean-venv install → import smoke test).
 - The committed preview PNG is regenerated deterministically from
@@ -169,7 +171,7 @@ If this package helps your research, cite it via the repository:
   title        = {ZDEM\_DFN: Discrete Fracture Network Generator for ZDEM Discrete Element Simulations},
   author       = {Phoenix0531-sudo},
   year         = {2026},
-  version      = {1.1.0},
+  version      = {1.2.0},
   url          = {https://github.com/Phoenix0531-sudo/ZDEM_DFN},
 }
 ```
